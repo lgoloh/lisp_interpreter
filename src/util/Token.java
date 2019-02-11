@@ -12,7 +12,7 @@ public class Token {
 	
 	@Override
 	public String toString() {
-		return "(" + mType + " " + mValue + ")";
+		return "{" + mType + " " + mValue + "}";
 	}
 	
 	public Type getType() {

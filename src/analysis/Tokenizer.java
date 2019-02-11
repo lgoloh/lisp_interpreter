@@ -3,8 +3,9 @@ package analysis;
 import util.Token;
 import util.Type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Pattern;
+//import java.util.regex.Pattern;
 
 public class Tokenizer {
 	
@@ -12,17 +13,19 @@ public class Tokenizer {
 	private Token mCurToken;
 	private String mInputString;
 	
-	public Tokenizer(String inputText) {
-		mInputString = inputText;
+	public Tokenizer(String inputmInputString) {
+		mInputString = inputmInputString;
 		mCurPosition = 0;
 		mCurToken = null;
 	}
 	
-	public Token getNextToken(String text) {
+	public Token getNextToken() {
 		char character = 0;
 		
-		if (mCurPosition < text.length()) {
-			 character = text.charAt(mCurPosition);
+		if (mCurPosition < mInputString.length()) {
+			 character = mInputString.charAt(mCurPosition);
+		} else if (mCurPosition == mInputString.length()) {
+			return new Token(Type.EOF, null);
 		}
 		
 		switch(character) {
@@ -37,12 +40,14 @@ public class Tokenizer {
 				return mCurToken;	
 			}
 		if (Character.isDigit(character) || character == '+' || character == '-') {
-			return recognizeNumberToken(text.substring(mCurPosition, text.length()-1));
+			mCurToken =  recognizeNumberToken(mInputString.substring(mCurPosition, mInputString.length()-1));
+			return mCurToken;
 		}
 		
 		if (Character.isLetter(character) || Character.isDigit(character) 
 				|| isSpecialSymbol(character)) {
-			return recognizeSymbolToken(text.substring(mCurPosition, text.length()-1));
+			mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition, mInputString.length()-1));
+			return mCurToken;
 		}
 		
 		return null;
@@ -50,42 +55,62 @@ public class Tokenizer {
 	
 	/**
 	 * Recognizes a number token.
-	 * @param text; starts with either a digit, a + or a - sign.
+	 * @param mInputString; starts with either a digit, a + or a - sign.
 	 * @return a token object
 	 */
-	private Token recognizeNumberToken(String text) {
-		char character = text.charAt(0);
-		mCurPosition++;
+	private Token recognizeNumberToken(String mInputString) {
+		char character = mInputString.charAt(0);
+		System.out.println("True");
 		String value = Character.toString(character);
-		
-		//if the length of the text is greater than 1, that is 
-		if (text.length() > 1) {
-			for (int i = 1; i < text.length();) {
-				character = text.charAt(i);
+		if (mInputString.length() == 1 && Character.isDigit(character)) {
+			mCurPosition++;
+			return new Token(Type.NUMBER, value);
+		} else if (mInputString.length() == 1 && (character == '+' || character == '-')) {
+			System.out.println("True");
+			return null;
+		} else {
+			mCurPosition++;
+			System.out.println("True");
+			for (int i = 1; i < mInputString.length();) {
+				character = mInputString.charAt(i);
 				if (!(Character.isWhitespace(character))) {
 					if (Character.isDigit(character)) {
 						value+=character;
 						i++;
 						mCurPosition++;
 					}
+				} else if (Character.isDigit(character)){
+					return new Token(Type.NUMBER, value);
 				}
 			}
-			return new Token(Type.NUMBER, value);
-		} else if (text.length() == 1 && Character.isDigit(character)){
-			return new Token(Type.NUMBER, value);
+			
 		}
 		return null;
 	}
 	
 	/**
 	 * Recognizes a symbol token.
-	 * @param text starts with either a letter, a digit, or a special symbol
+	 * @param mInputString starts with either a letter, a digit, or a special symbol
 	 * @return a token object
 	 */
-	private Token recognizeSymbolToken(String text) {
-		char character = text.charAt(0);
+	private Token recognizeSymbolToken(String mInputString) {
+		char character = mInputString.charAt(0);
 		mCurPosition++;
 		String value = Character.toString(character);
+		if (mInputString.length() == 1) {
+			return new Token(Type.SYMBOL, value);
+		} else {
+			for (int i = 1; i < mInputString.length();) {
+				character = mInputString.charAt(i);
+				if (!(Character.isWhitespace(character))) {
+					value+=character;
+					i++;
+					mCurPosition++;
+				} else {
+					return new Token(Type.SYMBOL, value);
+				}
+			}
+		}
 		return null;  
 	}
 	
@@ -98,6 +123,25 @@ public class Tokenizer {
 		char[] specialSymbols = {'+', '-', '*', '/', '@', '$', '%', '^', 
 				'&', '_', '=', '<', '>', '~', '.'};
 		return Arrays.asList(specialSymbols).contains(c);
+	}
+	
+	/**
+	 * Returns an ArrayList of tokens
+	 * @return
+	 */
+	public ArrayList<Token> allTokens() {
+		ArrayList<Token> allTokens = new ArrayList<>();
+		Token token = this.getNextToken();
+		while (token.getType() != Type.EOF) {
+			System.out.println("Testing");
+			allTokens.add(token);
+			token = this.getNextToken();
+			System.out.println(token.toString());
+		}
+		for (Token t : allTokens) {
+			System.out.println(t.toString());
+		}
+		return allTokens;
 	}
  
 }
