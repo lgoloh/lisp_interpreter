@@ -14,12 +14,15 @@ public class Parser {
 	}
 	
 	private void isExpression(ArrayList<Token> tokens) {
-		switch(token.getType()) {
-		case NUMBER:
-			break;
-		case SOE:
-			
+		for (Token token : tokens) {	
+			switch(token.getType()) {
+			case NUMBER:
+				break;
+			case SOE:
+				
+			}
 		}
+		
 	}
 	
 	
