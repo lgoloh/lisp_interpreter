@@ -13,42 +13,55 @@ public class Tokenizer {
 	private Token mCurToken;
 	private String mInputString;
 	
-	public Tokenizer(String inputmInputString) {
-		mInputString = inputmInputString;
+	public Tokenizer(String inputString) {
+		mInputString = inputString;
 		mCurPosition = 0;
 		mCurToken = null;
 	}
 	
 	public Token getNextToken() {
 		char character = 0;
+		System.out.println(mCurPosition);
 		
-		if (mCurPosition < mInputString.length()) {
-			 character = mInputString.charAt(mCurPosition);
-		} else if (mCurPosition == mInputString.length()) {
-			return new Token(Type.EOF, null);
-		}
-		
-		switch(character) {
-			case '(':
-				mCurPosition+=1;
-				mCurToken = new Token(Type.SOE, Character.toString(character));
-				return mCurToken;
+		//if the mCurPosition is less than the length of the string
+		//and is not a whitespace character 
+		if (mCurPosition == mInputString.length()) {
+			mCurPosition++;
+			return new Token(Type.EOF, null); 
+		} else if (mCurPosition < mInputString.length()) {
+			 character = nextAfterWhitespace(mInputString.charAt(mCurPosition));
+			 
+			 switch(character) {    
+				case '(':
+					mCurPosition+=1;
+					mCurToken = new Token(Type.SOE, Character.toString(character));
+					return mCurToken;
+					
+				case ')':
+					mCurPosition+=1;
+					mCurToken = new Token(Type.EOE, Character.toString(character));
+					return mCurToken;
 				
-			case ')':
-				mCurPosition+=1;
-				mCurToken = new Token(Type.EOE, Character.toString(character));
-				return mCurToken;	
+				}
+			 System.out.println("TTrue");
+			if (Character.isDigit(character) || character == '+' || character == '-') {
+				System.out.println("TTrue");
+				mCurToken =  recognizeNumberToken(mInputString.substring(mCurPosition));
+				if (mCurToken != null) {
+					return mCurToken;
+				} else {
+					mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
+					return mCurToken;
+				}	
 			}
-		if (Character.isDigit(character) || character == '+' || character == '-') {
-			mCurToken =  recognizeNumberToken(mInputString.substring(mCurPosition, mInputString.length()-1));
-			return mCurToken;
-		}
-		
-		if (Character.isLetter(character) || Character.isDigit(character) 
-				|| isSpecialSymbol(character)) {
-			mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition, mInputString.length()-1));
-			return mCurToken;
-		}
+			System.out.println("FTrue");
+			if (Character.isLetter(character) || Character.isDigit(character) 
+					|| isSpecialSymbol(character)) {
+				System.out.println("TestTrue");
+				mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
+				return mCurToken;
+			}
+		} 
 		
 		return null;
 	}
@@ -66,25 +79,33 @@ public class Tokenizer {
 			mCurPosition++;
 			return new Token(Type.NUMBER, value);
 		} else if (mInputString.length() == 1 && (character == '+' || character == '-')) {
-			System.out.println("True");
 			return null;
 		} else {
-			mCurPosition++;
 			System.out.println("True");
+			mCurPosition++;
+			char curChar = character;
 			for (int i = 1; i < mInputString.length();) {
-				character = mInputString.charAt(i);
-				if (!(Character.isWhitespace(character))) {
-					if (Character.isDigit(character)) {
-						value+=character;
-						i++;
-						mCurPosition++;
-					}
-				} else if (Character.isDigit(character)){
-					return new Token(Type.NUMBER, value);
+				char prevChar = curChar;
+				System.out.println(prevChar);
+				curChar = mInputString.charAt(i);
+				System.out.println(curChar);
+				if (!(Character.isWhitespace(curChar)) && Character.isDigit(curChar)) {
+					value+=curChar;
+					System.out.println(value);
+					i++;
+					mCurPosition++;
+					System.out.println(mCurPosition); }
+				else if (Character.isDigit(prevChar)){
+					return new Token(Type.NUMBER, value); } 
+				else {
+					mCurPosition--;
+					break;
 				}
 			}
 			
 		}
+		System.out.println("isnull");
+		System.out.println(mCurPosition);
 		return null;
 	}
 	
@@ -95,23 +116,32 @@ public class Tokenizer {
 	 */
 	private Token recognizeSymbolToken(String mInputString) {
 		char character = mInputString.charAt(0);
+		System.out.println("ishere");
 		mCurPosition++;
 		String value = Character.toString(character);
+		System.out.println("Test");
 		if (mInputString.length() == 1) {
 			return new Token(Type.SYMBOL, value);
 		} else {
+			System.out.println(mInputString.length());
 			for (int i = 1; i < mInputString.length();) {
 				character = mInputString.charAt(i);
-				if (!(Character.isWhitespace(character))) {
+				System.out.println(character);
+				if (!(Character.isWhitespace(character)) && 
+						(Character.isLetter(character) || Character.isDigit(character) 
+						|| isSpecialSymbol(character))) {
 					value+=character;
+					System.out.println(value);
 					i++;
+					System.out.println(i);
 					mCurPosition++;
+					System.out.println(mCurPosition);
 				} else {
 					return new Token(Type.SYMBOL, value);
-				}
-			}
+				} 
+			} 
+			return new Token(Type.SYMBOL, value);
 		}
-		return null;  
 	}
 	
 	/**
@@ -120,9 +150,32 @@ public class Tokenizer {
 	 * @return boolean value
 	 */
 	private boolean isSpecialSymbol(char c) {
+		System.out.println("STrue");
 		char[] specialSymbols = {'+', '-', '*', '/', '@', '$', '%', '^', 
 				'&', '_', '=', '<', '>', '~', '.'};
-		return Arrays.asList(specialSymbols).contains(c);
+		for (char ch : specialSymbols) {
+			if (c == ch) {
+				System.out.println("AnsIsTrue");
+				return true;
+			} 
+		}	
+		return false;
+	}
+	
+	/**
+	 * Moves the index to the next position 
+	 * Assigns a new c if the current character is a Whitespace character
+	 */
+	private char nextAfterWhitespace(char c) {
+		if (Character.isWhitespace(c)) {
+			mCurPosition++;
+			System.out.println(mCurPosition);
+			return mInputString.charAt(mCurPosition);
+		} else {
+			System.out.println("True");
+			System.out.println(c);
+			return c;
+		}
 	}
 	
 	/**
@@ -135,9 +188,11 @@ public class Tokenizer {
 		while (token.getType() != Type.EOF) {
 			System.out.println("Testing");
 			allTokens.add(token);
+			
 			token = this.getNextToken();
 			System.out.println(token.toString());
 		}
+		allTokens.add(token);
 		for (Token t : allTokens) {
 			System.out.println(t.toString());
 		}
