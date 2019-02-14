@@ -33,8 +33,8 @@ class TokenizerTest {
 		testString5 = "-";
 		testString6 = "x";
 		testString7 = "/78gh";
-		testString8 = "list";
-		mTokenizer = new Tokenizer(testString6);
+		testString8 = "3 4 5";
+		mTokenizer = new Tokenizer(testString8);
 	}
 	
 
@@ -47,13 +47,13 @@ class TokenizerTest {
 		//Token token4 = mTokenizer.getNextToken();
 		//Token token5 = mTokenizer.getNextToken();
 		//Token token6 = mTokenizer.getNextToken();
-		assertEquals(token.toString(), "{SYMBOL x}");
+		assertEquals(token.toString(), "{NUMBER 3}");
 	}
 	
 	@Test
 	void assertAllTokens() {
 		ArrayList<Token> tokenList = mTokenizer.allTokens();
-		assertEquals(tokenList.get(0).toString(), "{SYMBOL x}");
+		assertEquals(tokenList.get(1).toString(), "{NUMBER 4}");
 	}
 
 }
