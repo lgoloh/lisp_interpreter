@@ -8,37 +8,26 @@ import util.Type;
 public class ExpressionNode {
 	
 	private Token mToken;
-	private ExpressionNode mLeftNode;
-	private ExpressionNode mRightNode;
-	
+	private ArrayList<ExpressionNode> mNodes;
+
 	public ExpressionNode() {
 	}
 	
-	public ExpressionNode(Token token, ExpressionNode leftnode,
-			ExpressionNode rightnode) {
+	public ExpressionNode(Token token, ArrayList<ExpressionNode> nodes) {
 		mToken = token;
-		mLeftNode = leftnode;
-		mRightNode = rightnode;
-	}
-	
-	public void setLeftExpression(ExpressionNode node) {
-		mLeftNode = node;
-	}
-	
-	public void setRightExpression(ExpressionNode node) {
-		mRightNode = node;
+		mNodes = nodes;
 	}
 	
 	public void setToken(Token token) {
 		mToken = token;
 	}
 	
-	public ExpressionNode getLeftExpression() {
-		return mLeftNode;
+	public Token getToken() {
+		return mToken;
 	}
 	
-	public ExpressionNode getRightExpression() {
-		return mRightNode;
+	public ArrayList<ExpressionNode> getnodeList() {
+		return mNodes;
 	}
 	
 	/**
@@ -57,5 +46,6 @@ public class ExpressionNode {
 	public String getSymbolValue() {
 		return mToken.getValue();
 	}
+	
 	
 }

@@ -1,12 +1,13 @@
 package analysis;
 
+import java.util.ArrayList;
+
 import util.Token;
 
 public class AtomNode extends ExpressionNode{
 
-	public AtomNode(Token token, ExpressionNode lnode, 
-			ExpressionNode rnode) {
-		super(token, lnode, rnode);
+	public AtomNode(Token token, ArrayList<ExpressionNode> nodeList) {
+		super(token, nodeList);
 	}
 }
  

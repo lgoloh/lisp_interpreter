@@ -23,6 +23,11 @@ class TokenizerTest {
 	protected String testString6;
 	protected String testString7;
 	protected String testString8;
+	protected String testString9;
+	protected String testString10;
+	protected String testString11;
+	protected String testString12;
+	protected String testString13;
 	
 	
 	public TokenizerTest() {
@@ -34,26 +39,31 @@ class TokenizerTest {
 		testString6 = "x";
 		testString7 = "/78gh";
 		testString8 = "3 4 5";
-		mTokenizer = new Tokenizer(testString8);
+		testString9 = "(+ 3 4 (+ 3 1))";
+		testString10 = "(quit)";
+		testString11 = "(listp (12 3 4))";
+		testString12 = "(<= (+ 4 5) 5)";
+		testString13 = "(cons a b)";
+		mTokenizer = new Tokenizer(testString12);
 	}
 	
 
 	@Test
 	void assertNextToken() {
 		Token token = mTokenizer.getNextToken();
-		//Token token2 = mTokenizer.getNextToken();
+		Token token2 = mTokenizer.getNextToken();
 		//Token token3 = mTokenizer.getNextToken();
 		//System.out.println(token3.toString());
 		//Token token4 = mTokenizer.getNextToken();
 		//Token token5 = mTokenizer.getNextToken();
 		//Token token6 = mTokenizer.getNextToken();
-		assertEquals(token.toString(), "{NUMBER 3}");
+		assertEquals(token2.toString(), "{SYMBOL <=}");
 	}
 	
 	@Test
 	void assertAllTokens() {
 		ArrayList<Token> tokenList = mTokenizer.allTokens();
-		assertEquals(tokenList.get(1).toString(), "{NUMBER 4}");
+		assertEquals(tokenList.get(0).toString(), "{SOE (}");
 	}
 
 }
