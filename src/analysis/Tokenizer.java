@@ -86,9 +86,9 @@ public class Tokenizer {
 			char curChar = character;
 			for (int i = 1; i < mInputString.length();) {
 				char prevChar = curChar;
-				//System.out.println(prevChar);
+				System.out.println(prevChar);
 				curChar = mInputString.charAt(i);
-				//System.out.println(curChar);
+				System.out.println(curChar);
 				if (!(Character.isWhitespace(curChar)) && Character.isDigit(curChar)) {
 					value+=curChar;
 					//System.out.println(value);
@@ -97,7 +97,9 @@ public class Tokenizer {
 					mCurPosition++;
 					//System.out.println(mCurPosition); 
 					}
-				else if (Character.isDigit(prevChar)){
+				//if it gets here then either curChar is Whitespace or is not a digit
+				else if (Character.isDigit(prevChar) && 
+						(Character.isWhitespace(curChar) || (curChar == '(' || curChar == ')'))){
 					return new Token(Type.NUMBER, value); } 
 				else {
 					mCurPosition--;
@@ -195,9 +197,9 @@ public class Tokenizer {
 			//System.out.println(token.toString());
 		}
 		allTokens.add(token);
-		//for (Token t : allTokens) {
-		//	System.out.println(t.toString());
-		//}
+		for (Token t : allTokens) {
+			System.out.println(t.toString());
+		}
 		return allTokens;
 	}
  

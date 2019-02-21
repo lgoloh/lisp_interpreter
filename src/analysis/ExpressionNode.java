@@ -45,7 +45,6 @@ public class ExpressionNode {
 	 */
 	public String getSymbolValue() {
 		return mToken.getValue();
-	}
-	
+	}	
 	
 }

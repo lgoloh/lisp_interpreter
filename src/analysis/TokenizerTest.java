@@ -28,6 +28,7 @@ class TokenizerTest {
 	protected String testString11;
 	protected String testString12;
 	protected String testString13;
+	protected String testString14;
 	
 	
 	public TokenizerTest() {
@@ -44,7 +45,9 @@ class TokenizerTest {
 		testString11 = "(listp (12 3 4))";
 		testString12 = "(<= (+ 4 5) 5)";
 		testString13 = "(cons a b)";
-		mTokenizer = new Tokenizer(testString12);
+		testString14 = "(+ 12(+ 1) 3)";
+		String testString15 = "*123";
+		mTokenizer = new Tokenizer(testString15);
 	}
 	
 
@@ -52,12 +55,12 @@ class TokenizerTest {
 	void assertNextToken() {
 		Token token = mTokenizer.getNextToken();
 		Token token2 = mTokenizer.getNextToken();
-		//Token token3 = mTokenizer.getNextToken();
+		Token token3 = mTokenizer.getNextToken();
 		//System.out.println(token3.toString());
 		//Token token4 = mTokenizer.getNextToken();
 		//Token token5 = mTokenizer.getNextToken();
 		//Token token6 = mTokenizer.getNextToken();
-		assertEquals(token2.toString(), "{SYMBOL <=}");
+		assertEquals(token2.toString(), "{NUMBER +12}");
 	}
 	
 	@Test

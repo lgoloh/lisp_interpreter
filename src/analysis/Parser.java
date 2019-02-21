@@ -9,6 +9,7 @@ public class Parser {
 	
 	private ArrayList<Token> mTokens;
 	private ArrayList<ExpressionNode> mSyntaxTree;
+	private ExpressionNode mSyntaxTree2;
 	private int mCurPosition = 0;
 	
 	public Parser(ArrayList<Token> tokens) {
@@ -18,25 +19,28 @@ public class Parser {
 	/**
 	 * Generate S-expression AST; to be traversed by Inorder traversal
 	 */
-	public ArrayList<ExpressionNode> generateSyntaxTree() {
+	//public ArrayList<ExpressionNode> generateSyntaxTree() {
+	public ExpressionNode generateSyntaxTree() {	
 		int numOfSOE = count_SOE();
 		int numOfEOE = count_EOE();
 		
 		if (numOfSOE == 0 && numOfSOE == numOfEOE) {
-			mSyntaxTree = new ArrayList<>();
+			mSyntaxTree2 = new AtomNode(mTokens.get(0), null);
+			return mSyntaxTree2; 
 		} else if (numOfSOE == 0 && numOfSOE != numOfEOE){
 			throw new InvalidInputError("No Matching Opening Parenthesis");
 		}
-		
+		///test 
 		if (numOfSOE == numOfEOE) {
 			//System.out.println(mTokens.size());
 			while (mCurPosition < mTokens.size()) {
 				//System.out.println(mCurPosition);
 				Token thistoken = mTokens.get(mCurPosition);
 				if (thistoken.getType() == Type.SOE) {
+					mSyntaxTree2 = new ListNode(thistoken, nodeList(mTokens));
 					///ArrayList<Token> expr = getNestedExpression(mCurPosition, mTokens);
-					mSyntaxTree = nodeList(mTokens);
-					System.out.println(mSyntaxTree.toString());
+					//mSyntaxTree = nodeList(mTokens);
+					//System.out.println(mSyntaxTree.toString());
 					System.out.println("isithere?");
 					mCurPosition++;
 					Token tkn = mTokens.get(mCurPosition);
@@ -45,7 +49,8 @@ public class Parser {
 				} else if (thistoken.getType() == Type.SYMBOL || 
 						thistoken.getType() == Type.NUMBER){
 					AtomNode atom = new AtomNode(thistoken, null);
-					mSyntaxTree.add(atom);
+					mSyntaxTree2.getnodeList().add(atom);
+					//mSyntaxTree.add(atom);
 					mCurPosition++;
 				} else if (thistoken.getType() == Type.EOE ||
 						thistoken.getType() == Type.EOF) {
@@ -56,9 +61,22 @@ public class Parser {
 		} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
 		}
-		System.out.println(mSyntaxTree.toString());
+		System.out.println("AST" + " " + mSyntaxTree2.getnodeList().toString());
+		int count = 0;
+		System.out.println(mSyntaxTree2.getToken().toString());
+		for (ExpressionNode node : mSyntaxTree2.getnodeList()) {
+			if (node instanceof AtomNode) {
+				System.out.println("Atomnode" + " " + node.getToken().toString());
+			} else if (node instanceof ListNode) {
+				System.out.println(count++);
+				System.out.println("listnode" + " " + node.getToken().toString());
+				for (ExpressionNode nestednode : node.getnodeList()) {
+					System.out.println(nestednode.getToken().toString());
+				}
+			}
+		}
 		//System.out.println("outoffunction");
-		return mSyntaxTree;
+		return mSyntaxTree2;
 	} 
 	
 	public int count_SOE() {
