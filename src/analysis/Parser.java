@@ -17,7 +17,7 @@ public class Parser {
 	}
 	
 	/**
-	 * Generate S-expression AST; to be traversed by Inorder traversal
+	 * Generate S-expression AST;
 	 */
 	//public ArrayList<ExpressionNode> generateSyntaxTree() {
 	public ExpressionNode generateSyntaxTree() {	
@@ -30,52 +30,27 @@ public class Parser {
 		} else if (numOfSOE == 0 && numOfSOE != numOfEOE){
 			throw new InvalidInputError("No Matching Opening Parenthesis");
 		}
-		///test 
+		
 		if (numOfSOE == numOfEOE) {
-			//System.out.println(mTokens.size());
 			while (mCurPosition < mTokens.size()) {
-				//System.out.println(mCurPosition);
 				Token thistoken = mTokens.get(mCurPosition);
 				if (thistoken.getType() == Type.SOE) {
 					mSyntaxTree2 = new ListNode(thistoken, nodeList(mTokens));
-					///ArrayList<Token> expr = getNestedExpression(mCurPosition, mTokens);
-					//mSyntaxTree = nodeList(mTokens);
-					//System.out.println(mSyntaxTree.toString());
-					//System.out.println("isithere?");
 					mCurPosition++;
-					Token tkn = mTokens.get(mCurPosition);
-					//System.out.println(tkn.toString());
-					//System.out.println(mCurPosition);
+					//Token tkn = mTokens.get(mCurPosition);
 				} else if (thistoken.getType() == Type.SYMBOL || 
 						thistoken.getType() == Type.NUMBER){
 					AtomNode atom = new AtomNode(thistoken, null);
 					mSyntaxTree2.getnodeList().add(atom);
-					//mSyntaxTree.add(atom);
 					mCurPosition++;
 				} else if (thistoken.getType() == Type.EOE ||
 						thistoken.getType() == Type.EOF) {
-					//System.out.println("blahblah");
 					break;
 				}
 			}
 		} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
 		}
-		//System.out.println("AST" + " " + mSyntaxTree2.getnodeList().toString());
-		//int count = 0;
-		/**System.out.println(mSyntaxTree2.getToken().toString());
-		for (ExpressionNode node : mSyntaxTree2.getnodeList()) {
-			if (node instanceof AtomNode) {
-				System.out.println("Atomnode" + " " + node.getToken().toString());
-			} else if (node instanceof ListNode) {
-				System.out.println(count++);
-				System.out.println("listnode" + " " + node.getToken().toString());
-				for (ExpressionNode nestednode : node.getnodeList()) {
-					System.out.println(nestednode.getToken().toString());
-				}
-			}
-		} **/
-		//System.out.println("outoffunction");
 		return mSyntaxTree2;
 	} 
 	
@@ -104,44 +79,21 @@ public class Parser {
 	 */
 	public ArrayList<ExpressionNode> nodeList(ArrayList<Token> tokens) {
 		ArrayList<ExpressionNode> nodes = new ArrayList<>();
-		///int i = 1;
 		mCurPosition+=1;
 		Token tkn = tokens.get(mCurPosition);
-		//System.out.println(tkn.toString());
-		//System.out.println("test2" + mCurPosition);
 		while (tkn.getType() != Type.EOE && tkn.getType() != Type.EOF) {
 			if (tkn.getType() == Type.NUMBER || tkn.getType() == Type.SYMBOL) {
-				//System.out.println(tkn.toString());
 				AtomNode atom = new AtomNode(tkn, null);
 				nodes.add(atom);
-				//i++;
 				mCurPosition++;
-				//System.out.println(mCurPosition);
 				tkn = tokens.get(mCurPosition);
-				//System.out.println(tkn.toString());
-				//System.out.println("outofwhileloop");
 			} else if (tkn.getType() == Type.SOE) {
-				//System.out.println("nestedexpression");
-				//System.out.println(mCurPosition);
-				//ArrayList<Token> nestedExpression = getNestedExpression(mCurPosition, tokens);
-				//System.out.println(nestedExpression.toString());
 				ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
-				ArrayList<ExpressionNode> res = newExpr.getnodeList();
-				//System.out.println(res.toString());
-				/**for (ExpressionNode node : res) {
-					System.out.println(node.getToken().toString());
-				} **/
 				nodes.add(newExpr);
 				mCurPosition++;
-				//System.out.println(mCurPosition);
-				//System.out.println(tokens);
 				tkn = tokens.get(mCurPosition);
-				//System.out.println(tkn.toString());
-				//System.out.println("thistest" + mCurPosition);
-				//System.out.println(nodes.toString());
 			}
 		}
-		//System.out.println("outofwhileloop");
 		return nodes;
 		
 	}
@@ -155,7 +107,6 @@ public class Parser {
 			token = tokens.get(i);
 		}
 		nestedExpression.add(tokens.get(i));
-		//System.out.println(i);
 		return nestedExpression;
 	}
 	

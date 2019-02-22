@@ -21,10 +21,6 @@ public class Tokenizer {
 	
 	public Token getNextToken() {
 		char character = 0;
-		//System.out.println("check" + mCurPosition);
-		
-		//if the mCurPosition is less than the length of the string
-		//and is not a whitespace character 
 		if (mCurPosition == mInputString.length()) {
 			mCurPosition++;
 			return new Token(Type.EOF, null); 
@@ -44,9 +40,7 @@ public class Tokenizer {
 					return mCurToken;
 				
 				}
-			 //System.out.println("TTrue");
 			if (Character.isDigit(character) || character == '+' || character == '-') {
-				//System.out.println("TTrue");
 				mCurToken =  recognizeNumberToken(mInputString.substring(mCurPosition));
 				if (mCurToken != null) {
 					return mCurToken;
@@ -56,10 +50,8 @@ public class Tokenizer {
 					return mCurToken;
 				}	
 			}
-			//System.out.println("FTrue");
 			if (Character.isLetter(character) || Character.isDigit(character) 
 					|| isSpecialSymbol(character)) {
-				//System.out.println("TestTrue");
 				mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
 				return mCurToken;
 			}
@@ -79,7 +71,6 @@ public class Tokenizer {
 	 */
 	private Token recognizeNumberToken(String mInputString) {
 		char character = mInputString.charAt(0);
-		//System.out.println("True");
 		String value = Character.toString(character);
 		if (mInputString.length() == 1 && Character.isDigit(character)) {
 			mCurPosition++;
@@ -87,23 +78,16 @@ public class Tokenizer {
 		} else if (mInputString.length() == 1 && (character == '+' || character == '-')) {
 			return null;
 		} else {
-			//System.out.println("True");
 			mCurPosition++;
 			char curChar = character;
 			for (int i = 1; i < mInputString.length();) {
 				char prevChar = curChar;
-				//System.out.println(prevChar);
 				curChar = mInputString.charAt(i);
-				//System.out.println(curChar);
 				if (!(Character.isWhitespace(curChar)) && Character.isDigit(curChar)) {
 					value+=curChar;
-					//System.out.println(value);
 					i++;
-					//System.out.println(i);
 					mCurPosition++;
-					//System.out.println(mCurPosition); 
 					}
-				//if it gets here then either curChar is Whitespace or is not a digit
 				else if (Character.isDigit(prevChar) && 
 						(Character.isWhitespace(curChar) || (curChar == '(' || curChar == ')'))){
 					return new Token(Type.NUMBER, value); } 
@@ -114,8 +98,6 @@ public class Tokenizer {
 			} if (Character.isDigit(curChar)) {
 				return new Token(Type.NUMBER, value);}
 		}
-		//System.out.println("isnull");
-		//System.out.println(mCurPosition);
 		return null;
 	}
 	
@@ -126,14 +108,11 @@ public class Tokenizer {
 	 */
 	private Token recognizeSymbolToken(String mInputString) {
 		char character = mInputString.charAt(0);
-		//System.out.println("ishere");
 		mCurPosition++;
 		String value = Character.toString(character);
-		//System.out.println("Test");
 		if (mInputString.length() == 1) {
 			return new Token(Type.SYMBOL, value);
 		} else {
-			//System.out.println(mInputString.length());
 			for (int i = 1; i < mInputString.length();) {
 				character = mInputString.charAt(i);
 				System.out.println(character);
@@ -141,11 +120,8 @@ public class Tokenizer {
 						(Character.isLetter(character) || Character.isDigit(character) 
 						|| isSpecialSymbol(character))) {
 					value+=character;
-					//System.out.println(value);
 					i++;
-					//System.out.println(i);
 					mCurPosition++;
-					//System.out.println(mCurPosition);
 				} else if (Character.isWhitespace(character)){
 					System.out.println("This value" + value);
 					return new Token(Type.SYMBOL, value);
@@ -161,12 +137,10 @@ public class Tokenizer {
 	 * @return boolean value
 	 */
 	private boolean isSpecialSymbol(char c) {
-		//System.out.println("STrue");
 		char[] specialSymbols = {'+', '-', '*', '/', '@', '$', '%', '^', 
 				'&', '_', '=', '<', '>', '~', '.'};
 		for (char ch : specialSymbols) {
 			if (c == ch) {
-				//System.out.println("AnsIsTrue");
 				return true;
 			} 
 		}	

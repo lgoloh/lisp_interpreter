@@ -23,7 +23,6 @@ public class Evaluator {
 	 * @return
 	 */
 	public int evaluateNumber(ExpressionNode node) {
-		//String value = node.getToken().getValue();
 		return (Integer.valueOf(node.getToken().getValue()));
 	}
 	
@@ -141,6 +140,8 @@ public class Evaluator {
 			throw new InvalidInputError("Symbol has no value");
 		}
 	}
+	
+	
 	
 	
 	
