@@ -41,11 +41,11 @@ public class Parser {
 					///ArrayList<Token> expr = getNestedExpression(mCurPosition, mTokens);
 					//mSyntaxTree = nodeList(mTokens);
 					//System.out.println(mSyntaxTree.toString());
-					System.out.println("isithere?");
+					//System.out.println("isithere?");
 					mCurPosition++;
 					Token tkn = mTokens.get(mCurPosition);
-					System.out.println(tkn.toString());
-					System.out.println(mCurPosition);
+					//System.out.println(tkn.toString());
+					//System.out.println(mCurPosition);
 				} else if (thistoken.getType() == Type.SYMBOL || 
 						thistoken.getType() == Type.NUMBER){
 					AtomNode atom = new AtomNode(thistoken, null);
@@ -54,16 +54,16 @@ public class Parser {
 					mCurPosition++;
 				} else if (thistoken.getType() == Type.EOE ||
 						thistoken.getType() == Type.EOF) {
-					System.out.println("blahblah");
+					//System.out.println("blahblah");
 					break;
 				}
 			}
 		} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
 		}
-		System.out.println("AST" + " " + mSyntaxTree2.getnodeList().toString());
-		int count = 0;
-		System.out.println(mSyntaxTree2.getToken().toString());
+		//System.out.println("AST" + " " + mSyntaxTree2.getnodeList().toString());
+		//int count = 0;
+		/**System.out.println(mSyntaxTree2.getToken().toString());
 		for (ExpressionNode node : mSyntaxTree2.getnodeList()) {
 			if (node instanceof AtomNode) {
 				System.out.println("Atomnode" + " " + node.getToken().toString());
@@ -74,7 +74,7 @@ public class Parser {
 					System.out.println(nestednode.getToken().toString());
 				}
 			}
-		}
+		} **/
 		//System.out.println("outoffunction");
 		return mSyntaxTree2;
 	} 
@@ -107,11 +107,11 @@ public class Parser {
 		///int i = 1;
 		mCurPosition+=1;
 		Token tkn = tokens.get(mCurPosition);
-		System.out.println(tkn.toString());
-		System.out.println("test2" + mCurPosition);
+		//System.out.println(tkn.toString());
+		//System.out.println("test2" + mCurPosition);
 		while (tkn.getType() != Type.EOE && tkn.getType() != Type.EOF) {
 			if (tkn.getType() == Type.NUMBER || tkn.getType() == Type.SYMBOL) {
-				System.out.println(tkn.toString());
+				//System.out.println(tkn.toString());
 				AtomNode atom = new AtomNode(tkn, null);
 				nodes.add(atom);
 				//i++;
@@ -128,20 +128,20 @@ public class Parser {
 				ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
 				ArrayList<ExpressionNode> res = newExpr.getnodeList();
 				//System.out.println(res.toString());
-				for (ExpressionNode node : res) {
+				/**for (ExpressionNode node : res) {
 					System.out.println(node.getToken().toString());
-				}
+				} **/
 				nodes.add(newExpr);
 				mCurPosition++;
-				System.out.println(mCurPosition);
-				System.out.println(tokens);
+				//System.out.println(mCurPosition);
+				//System.out.println(tokens);
 				tkn = tokens.get(mCurPosition);
-				System.out.println(tkn.toString());
-				System.out.println("thistest" + mCurPosition);
-				System.out.println(nodes.toString());
+				//System.out.println(tkn.toString());
+				//System.out.println("thistest" + mCurPosition);
+				//System.out.println(nodes.toString());
 			}
 		}
-		System.out.println("outofwhileloop");
+		//System.out.println("outofwhileloop");
 		return nodes;
 		
 	}

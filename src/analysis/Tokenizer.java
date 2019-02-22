@@ -21,7 +21,7 @@ public class Tokenizer {
 	
 	public Token getNextToken() {
 		char character = 0;
-		//System.out.println(mCurPosition);
+		//System.out.println("check" + mCurPosition);
 		
 		//if the mCurPosition is less than the length of the string
 		//and is not a whitespace character 
@@ -29,7 +29,8 @@ public class Tokenizer {
 			mCurPosition++;
 			return new Token(Type.EOF, null); 
 		} else if (mCurPosition < mInputString.length()) {
-			 character = nextAfterWhitespace(mInputString.charAt(mCurPosition));
+			 character = nextAfterWhitespace(mInputString);
+			 System.out.println(character);
 			 
 			 switch(character) {    
 				case '(':
@@ -50,6 +51,7 @@ public class Tokenizer {
 				if (mCurToken != null) {
 					return mCurToken;
 				} else {
+					System.out.println("Test");
 					mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
 					return mCurToken;
 				}	
@@ -60,6 +62,10 @@ public class Tokenizer {
 				//System.out.println("TestTrue");
 				mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
 				return mCurToken;
+			}
+			
+			if (Character.isWhitespace(character)) {
+				mCurPosition+=1;
 			}
 		} 
 		
@@ -86,9 +92,9 @@ public class Tokenizer {
 			char curChar = character;
 			for (int i = 1; i < mInputString.length();) {
 				char prevChar = curChar;
-				System.out.println(prevChar);
+				//System.out.println(prevChar);
 				curChar = mInputString.charAt(i);
-				System.out.println(curChar);
+				//System.out.println(curChar);
 				if (!(Character.isWhitespace(curChar)) && Character.isDigit(curChar)) {
 					value+=curChar;
 					//System.out.println(value);
@@ -130,7 +136,7 @@ public class Tokenizer {
 			//System.out.println(mInputString.length());
 			for (int i = 1; i < mInputString.length();) {
 				character = mInputString.charAt(i);
-				//System.out.println(character);
+				System.out.println(character);
 				if (!(Character.isWhitespace(character)) && 
 						(Character.isLetter(character) || Character.isDigit(character) 
 						|| isSpecialSymbol(character))) {
@@ -140,7 +146,8 @@ public class Tokenizer {
 					//System.out.println(i);
 					mCurPosition++;
 					//System.out.println(mCurPosition);
-				} else {
+				} else if (Character.isWhitespace(character)){
+					System.out.println("This value" + value);
 					return new Token(Type.SYMBOL, value);
 				} 
 			} 
@@ -170,16 +177,11 @@ public class Tokenizer {
 	 * Moves the index to the next position 
 	 * Assigns a new c if the current character is a Whitespace character
 	 */
-	private char nextAfterWhitespace(char c) {
-		if (Character.isWhitespace(c)) {
+	private char nextAfterWhitespace(String str) {
+		while (Character.isWhitespace(str.charAt(mCurPosition))) {
 			mCurPosition++;
-			//System.out.println(mCurPosition);
-			return mInputString.charAt(mCurPosition);
-		} else {
-			//System.out.println("True");
-			//System.out.println(c);
-			return c;
 		}
+		return mInputString.charAt(mCurPosition);
 	}
 	
 	/**
@@ -190,16 +192,16 @@ public class Tokenizer {
 		ArrayList<Token> allTokens = new ArrayList<>();
 		Token token = this.getNextToken();
 		while (token.getType() != Type.EOF) {
-			//System.out.println("Testing");
+			System.out.println("Testing");
 			allTokens.add(token);
 			
 			token = this.getNextToken();
-			//System.out.println(token.toString());
+			System.out.println(token.toString());
 		}
 		allTokens.add(token);
-		for (Token t : allTokens) {
+		/**for (Token t : allTokens) {
 			System.out.println(t.toString());
-		}
+		}**/
 		return allTokens;
 	}
  
