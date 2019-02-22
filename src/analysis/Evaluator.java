@@ -84,22 +84,22 @@ public class Evaluator {
 					argStack.push(result);
 				}
 				return (argStack.pop());
-			} else if (evaluateSymbol(head) != null && listnode.getnodeList().size() == 1) {
+				} else if (evaluateSymbol(head) != null && listnode.getnodeList().size() == 1) {
 				BinOperator operation = evaluateSymbol(head);
 				System.out.println(head.getSymbolValue());
 				if (operation instanceof Sum) {
-					System.out.println(head.getSymbolValue());
+					System.out.println("Fun");
 					return 0;
-				} else if (operation instanceof Multiply) {
+					} else if (operation instanceof Multiply) {
 					return 1;
-				} else {
+					} else {
 					throw new InvalidInputError(head.getSymbolValue() + " " + "has too few arguments");
-				}
-			
+					}
+				} 
 		} else {
 			throw new InvalidInputError(head.getSymbolValue() + " " + "is not a Valid Symbol");
 			}
-			}
+			
 		return 0;
 	}
 	
