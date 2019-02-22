@@ -17,10 +17,8 @@ public class Main {
 			System.out.println("CL-Lisp > ");
 			mInput = read();
 			if (matchParentheses(mInput)) {
-				System.out.println(mInput);
 				Tokenizer tokenizer = new Tokenizer(mInput);
 				ArrayList<Token> tokenizedInput = tokenizer.allTokens();
-				System.out.println(tokenizedInput);
 				Parser parser = new Parser(tokenizedInput);
 				ExpressionNode syntaxTree = parser.generateSyntaxTree();
 				Evaluator evaluator = new Evaluator(syntaxTree);

@@ -141,8 +141,4 @@ public class Evaluator {
 		}
 	}
 	
-	
-	
-	
-	
 }

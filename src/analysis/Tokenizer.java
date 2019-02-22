@@ -26,7 +26,6 @@ public class Tokenizer {
 			return new Token(Type.EOF, null); 
 		} else if (mCurPosition < mInputString.length()) {
 			 character = nextAfterWhitespace(mInputString);
-			 System.out.println(character);
 			 
 			 switch(character) {    
 				case '(':
@@ -45,7 +44,6 @@ public class Tokenizer {
 				if (mCurToken != null) {
 					return mCurToken;
 				} else {
-					System.out.println("Test");
 					mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
 					return mCurToken;
 				}	
@@ -115,7 +113,6 @@ public class Tokenizer {
 		} else {
 			for (int i = 1; i < mInputString.length();) {
 				character = mInputString.charAt(i);
-				System.out.println(character);
 				if (!(Character.isWhitespace(character)) && 
 						(Character.isLetter(character) || Character.isDigit(character) 
 						|| isSpecialSymbol(character))) {
@@ -123,7 +120,6 @@ public class Tokenizer {
 					i++;
 					mCurPosition++;
 				} else if (Character.isWhitespace(character)){
-					System.out.println("This value" + value);
 					return new Token(Type.SYMBOL, value);
 				} 
 			} 
@@ -166,11 +162,8 @@ public class Tokenizer {
 		ArrayList<Token> allTokens = new ArrayList<>();
 		Token token = this.getNextToken();
 		while (token.getType() != Type.EOF) {
-			System.out.println("Testing");
 			allTokens.add(token);
-			
 			token = this.getNextToken();
-			System.out.println(token.toString());
 		}
 		allTokens.add(token);
 		/**for (Token t : allTokens) {

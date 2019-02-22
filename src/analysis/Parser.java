@@ -8,7 +8,6 @@ import util.Type;
 public class Parser {
 	
 	private ArrayList<Token> mTokens;
-	private ArrayList<ExpressionNode> mSyntaxTree;
 	private ExpressionNode mSyntaxTree2;
 	private int mCurPosition = 0;
 	
