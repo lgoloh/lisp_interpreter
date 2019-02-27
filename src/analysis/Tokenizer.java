@@ -108,18 +108,19 @@ public class Tokenizer {
 		char character = mInputString.charAt(0);
 		mCurPosition++;
 		String value = Character.toString(character);
-		if (mInputString.length() == 1) {
+		if (mInputString.length() == 1 || isSpecialOperator(character)) {
 			return new Token(Type.SYMBOL, value);
 		} else {
 			for (int i = 1; i < mInputString.length();) {
 				character = mInputString.charAt(i);
-				if (!(Character.isWhitespace(character)) && 
+				if (!(Character.isWhitespace(character)) &&
 						(Character.isLetter(character) || Character.isDigit(character) 
 						|| isSpecialSymbol(character))) {
 					value+=character;
 					i++;
 					mCurPosition++;
-				} else if (Character.isWhitespace(character)  || (character == '(' || character == ')')){
+				} else if (Character.isWhitespace(character)
+						|| (character == '(' || character == ')')){
 					return new Token(Type.SYMBOL, value);
 				} 
 			} 

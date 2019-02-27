@@ -146,7 +146,11 @@ public class Evaluator {
 	}
 	
 	
-	public ExpressionNode evaulateCons(ExpressionNode arg) {
+	public ExpressionNode evaulateCons(ArrayList<ExpressionNode> arg) {
+		return null;
+	}
+	
+	public ExpressionNode evaluateList() {
 		return null;
 	}
 	

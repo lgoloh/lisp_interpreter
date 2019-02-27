@@ -92,21 +92,37 @@ public class Parser {
 		mCurPosition+=1;
 		Token tkn = tokens.get(mCurPosition);
 		while (tkn.getType() != Type.EOE && tkn.getType() != Type.EOF) {
+			int prevIndex = mCurPosition-1;
 			if (tkn.getType() == Type.NUMBER) {
 				int number = Integer.valueOf(tkn.getValue());
-				NumberNode num = new NumberNode(number, new ArrayList<>());
-				nodes.add(num);
+				if (nodes.get(prevIndex).getValue() == "'") {
+					NumberNode num = new NumberNode(number, new ArrayList<>());
+					nodes.get(prevIndex).getnodeList().add(num);
+				} else {
+					NumberNode num = new NumberNode(number, new ArrayList<>());
+					nodes.add(num);
+				}
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			} else if (tkn.getType() == Type.SYMBOL) {
 				String symbol = tkn.getValue();
-				SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
-				nodes.add(sym);
+				if (nodes.get(prevIndex).getValue() == "'") {
+					SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
+					nodes.get(prevIndex).getnodeList().add(sym);
+				} else {
+					SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
+					nodes.add(sym);
+				}
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			} else if (tkn.getType() == Type.SOE) {
-				ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
-				nodes.add(newExpr);
+				if (nodes.get(prevIndex).getValue() == "'") {
+					ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
+					nodes.get(prevIndex).getnodeList().add(newExpr);
+				} else {
+					ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
+					nodes.add(newExpr);
+				}
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			}
