@@ -8,7 +8,7 @@ import util.Type;
 public class Parser {
 	
 	private ArrayList<Token> mTokens;
-	private ExpressionNode mSyntaxTree2;
+	private ExpressionNode mSyntaxTree2 = null;
 	private int mCurPosition = 0;
 	
 	public Parser(ArrayList<Token> tokens) {
@@ -17,30 +17,40 @@ public class Parser {
 	
 	/**
 	 * Generate S-expression AST;
+	 * TODO Change AtomNodes to NumberNodes and SymbolNodes as required 
 	 */
 	//public ArrayList<ExpressionNode> generateSyntaxTree() {
 	public ExpressionNode generateSyntaxTree() {	
 		int numOfSOE = count_SOE();
 		int numOfEOE = count_EOE();
-		
-		if (numOfSOE == 0 && numOfSOE == numOfEOE) {
-			mSyntaxTree2 = new AtomNode(mTokens.get(0), null);
-			return mSyntaxTree2; 
-		} else if (numOfSOE == 0 && numOfSOE != numOfEOE){
-			throw new InvalidInputError("No Matching Opening Parenthesis");
-		}
-		
+
 		if (numOfSOE == numOfEOE) {
 			while (mCurPosition < mTokens.size()) {
 				Token thistoken = mTokens.get(mCurPosition);
 				if (thistoken.getType() == Type.SOE) {
-					mSyntaxTree2 = new ListNode(thistoken, nodeList(mTokens));
+					if (mSyntaxTree2 != null) {
+						mSyntaxTree2.getnodeList().add(new ListNode(thistoken, nodeList(mTokens)));
+					} else if (mSyntaxTree2 == null) {
+						mSyntaxTree2 = new ListNode(thistoken, nodeList(mTokens));
+					}
 					mCurPosition++;
-					//Token tkn = mTokens.get(mCurPosition);
-				} else if (thistoken.getType() == Type.SYMBOL || 
-						thistoken.getType() == Type.NUMBER){
-					AtomNode atom = new AtomNode(thistoken, null);
-					mSyntaxTree2.getnodeList().add(atom);
+				} else if (thistoken.getType() == Type.SYMBOL) {
+					String symbol = mTokens.get(mCurPosition).getValue();
+					SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
+					if (mSyntaxTree2 != null) {
+						mSyntaxTree2.getnodeList().add(sym);
+					} else if (mSyntaxTree2 == null) {
+						mSyntaxTree2 = sym;
+					}
+					mCurPosition++;
+				} else if (thistoken.getType() == Type.NUMBER) {
+					int number = Integer.valueOf(mTokens.get(0).getValue());
+					NumberNode num = new NumberNode(number, new ArrayList<>());
+					if (mSyntaxTree2 != null) {
+						mSyntaxTree2.getnodeList().add(num);
+					} else if (mSyntaxTree2 == null) {
+						mSyntaxTree2 = num;
+					}
 					mCurPosition++;
 				} else if (thistoken.getType() == Type.EOE ||
 						thistoken.getType() == Type.EOF) {
@@ -51,7 +61,8 @@ public class Parser {
 			throw new InvalidInputError("Non Matching Parenthesis");
 		}
 		return mSyntaxTree2;
-	} 
+	}
+	
 	
 	public int count_SOE() {
 		int count = 0;
@@ -81,9 +92,16 @@ public class Parser {
 		mCurPosition+=1;
 		Token tkn = tokens.get(mCurPosition);
 		while (tkn.getType() != Type.EOE && tkn.getType() != Type.EOF) {
-			if (tkn.getType() == Type.NUMBER || tkn.getType() == Type.SYMBOL) {
-				AtomNode atom = new AtomNode(tkn, null);
-				nodes.add(atom);
+			if (tkn.getType() == Type.NUMBER) {
+				int number = Integer.valueOf(tkn.getValue());
+				NumberNode num = new NumberNode(number, new ArrayList<>());
+				nodes.add(num);
+				mCurPosition++;
+				tkn = tokens.get(mCurPosition);
+			} else if (tkn.getType() == Type.SYMBOL) {
+				String symbol = tkn.getValue();
+				SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
+				nodes.add(sym);
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			} else if (tkn.getType() == Type.SOE) {

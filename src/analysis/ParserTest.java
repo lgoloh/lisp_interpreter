@@ -87,7 +87,7 @@ public class ParserTest {
 	void assetSyntaxTree() {
 		ExpressionNode syntaxtree = mParser5.generateSyntaxTree();
 		//assertEquals(syntaxtree.getnodeList().get(0).getToken().toString(), "{NUMBER -3}");
-		assertEquals(syntaxtree.getToken().toString(), "{NUMBER -3}");
+		assertEquals(syntaxtree.getValue().toString(), "{NUMBER -3}");
 	}
 
 }

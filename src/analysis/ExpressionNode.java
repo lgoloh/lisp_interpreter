@@ -7,44 +7,34 @@ import util.Type;
 
 public class ExpressionNode {
 	
-	private Token mToken;
-	private ArrayList<ExpressionNode> mNodes;
+	protected Token mToken;
+	protected Object mObject;
+	protected ArrayList<ExpressionNode> mNodes;
 
 	public ExpressionNode() {
 	}
 	
-	public ExpressionNode(Token token, ArrayList<ExpressionNode> nodes) {
-		mToken = token;
+	//instead of taking a token, it should take the value of the symbol or the number 
+	public ExpressionNode(Object object, ArrayList<ExpressionNode> nodes) {
+		mObject = object;
 		mNodes = nodes;
 	}
 	
-	public void setToken(Token token) {
-		mToken = token;
+	public void setValue(Object object) {
+		mObject = object;
 	}
 	
-	public Token getToken() {
-		return mToken;
+	public Object getValue() {
+		return mObject;
 	}
 	
 	public ArrayList<ExpressionNode> getnodeList() {
 		return mNodes;
 	}
 	
-	/**
-	 * Used for only number tokens
-	 * @return The integer value of the number 
-	 */
-	public int getNumberValue() {
-		return Integer.valueOf(mToken.getValue());
 	
-	}
-	
-	/**
-	 * Used only for symbol tokens
-	 * @return
-	 */
-	public String getSymbolValue() {
-		return mToken.getValue();
-	}	
+	@Override
+	public String toString() {
+		return null;};
 	
 }

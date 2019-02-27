@@ -49,7 +49,7 @@ public class Tokenizer {
 				}	
 			}
 			if (Character.isLetter(character) || Character.isDigit(character) 
-					|| isSpecialSymbol(character)) {
+					|| isSpecialSymbol(character) || isSpecialOperator(character)) {
 				mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
 				return mCurToken;
 			}
@@ -119,7 +119,7 @@ public class Tokenizer {
 					value+=character;
 					i++;
 					mCurPosition++;
-				} else if (Character.isWhitespace(character)){
+				} else if (Character.isWhitespace(character)  || (character == '(' || character == ')')){
 					return new Token(Type.SYMBOL, value);
 				} 
 			} 
@@ -144,6 +144,18 @@ public class Tokenizer {
 	}
 	
 	/**
+	 * Checks for special operators; ' and #
+	 * @param c
+	 * @return
+	 */
+	private boolean isSpecialOperator(char c) {
+		if (Character.toString(c).equals("'") || c == '#') {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Moves the index to the next position 
 	 * Assigns a new c if the current character is a Whitespace character
 	 */
@@ -163,7 +175,9 @@ public class Tokenizer {
 		Token token = this.getNextToken();
 		while (token.getType() != Type.EOF) {
 			allTokens.add(token);
+			System.out.println(token);
 			token = this.getNextToken();
+			
 		}
 		allTokens.add(token);
 		/**for (Token t : allTokens) {

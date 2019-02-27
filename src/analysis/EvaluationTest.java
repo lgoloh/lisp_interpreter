@@ -31,7 +31,7 @@ public class EvaluationTest {
 	
 	@Test
 	void assert_evaluate_number() {
-		int result = mEvaluator.evaluateTree();
+		Object result = mEvaluator.evaluateTree();
 		assertEquals(14, result);
 	}
 	

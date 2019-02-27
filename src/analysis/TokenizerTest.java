@@ -46,7 +46,7 @@ class TokenizerTest {
 		testString12 = "(<= (+ 4 5) 5)";
 		testString13 = "(cons a b)";
 		testString14 = "(+ 12(+ 1) 3)";
-		String testString15 = "*123";
+		String testString15 = "(list '(1 2 3))";
 		mTokenizer = new Tokenizer(testString15);
 	}
 	
@@ -60,7 +60,7 @@ class TokenizerTest {
 		//Token token4 = mTokenizer.getNextToken();
 		//Token token5 = mTokenizer.getNextToken();
 		//Token token6 = mTokenizer.getNextToken();
-		assertEquals(token2.toString(), "{NUMBER +12}");
+		assertEquals(token.toString(), "{SOE (}");
 	}
 	
 	@Test
