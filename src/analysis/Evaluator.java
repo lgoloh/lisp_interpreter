@@ -49,11 +49,15 @@ public class Evaluator {
 				//returns the Quote operation object if ' or quote is used	
 				case "'"	:
 					//expands the quote operator to use the symbol quote
-					Quote data = new Quote(head);
-					return new Quote();
+					Token listtkn = new Token(Type.SOE, "(");
+					SymbolNode quoteSymbol = new SymbolNode("quote", null);
+					head.getnodeList().add(0, quoteSymbol);
+					ExpressionNode fullQuote = new ListNode(listtkn, head.getnodeList());
+					return  evaluateList(fullQuote);
 				case "quote":
 					//returns the actual Quote function that has the execution function
-					return new Quote();
+					Quote quote = new Quote();
+					return quote;
 			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
@@ -66,7 +70,7 @@ public class Evaluator {
 	 * @param listnode
 	 * @return
 	 */
-	public int evaluateList(ExpressionNode listnode) {
+	public Object evaluateList(ExpressionNode listnode) {
 		ArrayList<ExpressionNode> nodes = listnode.getnodeList();
 		ExpressionNode head = nodes.get(0);
 		if (head instanceof SymbolNode) {
@@ -75,10 +79,11 @@ public class Evaluator {
 			//If the operation is a binary operation (+, -, /, *)
 			if (operation instanceof BinOperator) {		
 				return evaluateMath((BinOperator) operation, nodes);
-			}
-			//If the operation is the Quote (quote) not shorthand quote
-			if (operation instanceof Quote) {
-				
+			} else if (operation instanceof Quote) {
+				((Quote) operation).setExpression(listnode);
+				Quote quote = (Quote) operation;
+				ExpressionNode data = (ExpressionNode) quote.returnData();
+				return data.toString();
 			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
@@ -105,7 +110,7 @@ public class Evaluator {
 				if (curNode instanceof NumberNode) {
 					tempStack.push(evaluateNumber((NumberNode) curNode));
 				} else if (curNode instanceof ListNode) {
-					tempStack.push(evaluateList(curNode));
+					tempStack.push((Integer) evaluateList(curNode));
 				}
 			} 
 			argStack = reverseStack(tempStack); 
@@ -130,7 +135,7 @@ public class Evaluator {
 	/**
 	 * Returns an ExpressionNode which could either be a NumberNode, SymbolNode or a ListNode
 	 * @param quote
-	 * @param arg -> ListNode
+	 * @param arg -> SymbolNode
 	 * @return
 	 */
 	public ExpressionNode evaluateQuote(Quote quote, SymbolNode arg) {
