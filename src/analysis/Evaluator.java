@@ -58,6 +58,9 @@ public class Evaluator {
 					//returns the actual Quote function that has the execution function
 					Quote quote = new Quote();
 					return quote;
+					
+				case "cons":
+					break;
 			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
@@ -143,6 +146,9 @@ public class Evaluator {
 	}
 	
 	
+	public ExpressionNode evaulateCons(ExpressionNode arg) {
+		return null;
+	}
 	
 	
 
