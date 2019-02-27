@@ -128,13 +128,13 @@ public class Evaluator {
 	}
 	
 	/**
-	 * Returns a string as it is
+	 * Returns an ExpressionNode which could either be a NumberNode, SymbolNode or a ListNode
 	 * @param quote
 	 * @param arg -> ListNode
 	 * @return
 	 */
-	public String evaluateQuote(Quote quote, ExpressionNode arg) {
-		return arg.toString();
+	public ExpressionNode evaluateQuote(Quote quote, SymbolNode arg) {
+		return quote.returnData();
 	}
 	
 	
