@@ -27,39 +27,21 @@ public class Parser {
 		if (numOfSOE == numOfEOE) {
 			while (mCurPosition < mTokens.size()) {
 				Token thistoken = mTokens.get(mCurPosition);
-				if (thistoken.getType() == Type.SOE) {
-					if (mSyntaxTree2 != null) {
-						mSyntaxTree2.getnodeList().add(new ListNode(thistoken, nodeList(mTokens)));
-					} else if (mSyntaxTree2 == null) {
-						mSyntaxTree2 = new ListNode(thistoken, nodeList(mTokens));
+				ExpressionNode expr = getnextExpression(thistoken);
+				if (mSyntaxTree2 != null) {
+					mSyntaxTree2.getnodeList().add(expr);
+					} else {
+					mSyntaxTree2 = expr;
 					}
-					mCurPosition++;
-				} else if (thistoken.getType() == Type.SYMBOL) {
-					String symbol = mTokens.get(mCurPosition).getValue();
-					SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
-					if (mSyntaxTree2 != null) {
-						mSyntaxTree2.getnodeList().add(sym);
-					} else if (mSyntaxTree2 == null) {
-						mSyntaxTree2 = sym;
-					}
-					mCurPosition++;
-				} else if (thistoken.getType() == Type.NUMBER) {
-					int number = Integer.valueOf(mTokens.get(0).getValue());
-					NumberNode num = new NumberNode(number, new ArrayList<>());
-					if (mSyntaxTree2 != null) {
-						mSyntaxTree2.getnodeList().add(num);
-					} else if (mSyntaxTree2 == null) {
-						mSyntaxTree2 = num;
-					}
-					mCurPosition++;
-				} else if (thistoken.getType() == Type.EOE ||
+				mCurPosition++;
+				if (thistoken.getType() == Type.EOE ||
 						thistoken.getType() == Type.EOF) {
 					break;
+					}
 				}
-			}
-		} else {
+			} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
-		}
+			}
 		return mSyntaxTree2;
 	}
 	
@@ -87,42 +69,26 @@ public class Parser {
 	 * @param tokens
 	 * @return
 	 */
-	public ArrayList<ExpressionNode> nodeList(ArrayList<Token> tokens) {
+	private ArrayList<ExpressionNode> nodeList(ArrayList<Token> tokens) {
 		ArrayList<ExpressionNode> nodes = new ArrayList<>();
 		mCurPosition+=1;
 		Token tkn = tokens.get(mCurPosition);
 		while (tkn.getType() != Type.EOE && tkn.getType() != Type.EOF) {
-			int prevIndex = mCurPosition-1;
 			if (tkn.getType() == Type.NUMBER) {
 				int number = Integer.valueOf(tkn.getValue());
-				if (nodes.get(prevIndex).getValue() == "'") {
-					NumberNode num = new NumberNode(number, new ArrayList<>());
-					nodes.get(prevIndex).getnodeList().add(num);
-				} else {
-					NumberNode num = new NumberNode(number, new ArrayList<>());
-					nodes.add(num);
-				}
+				NumberNode num = new NumberNode(number, new ArrayList<>());
+				nodes.add(num);
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			} else if (tkn.getType() == Type.SYMBOL) {
 				String symbol = tkn.getValue();
-				if (nodes.get(prevIndex).getValue() == "'") {
-					SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
-					nodes.get(prevIndex).getnodeList().add(sym);
-				} else {
-					SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
-					nodes.add(sym);
-				}
+				SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
+				nodes.add(sym);
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			} else if (tkn.getType() == Type.SOE) {
-				if (nodes.get(prevIndex).getValue() == "'") {
-					ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
-					nodes.get(prevIndex).getnodeList().add(newExpr);
-				} else {
-					ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
-					nodes.add(newExpr);
-				}
+				ListNode newExpr = new ListNode(tkn, nodeList(mTokens));
+				nodes.add(newExpr);
 				mCurPosition++;
 				tkn = tokens.get(mCurPosition);
 			}
@@ -131,7 +97,7 @@ public class Parser {
 		
 	}
 	
-	public ArrayList<Token> getNestedExpression(int i, ArrayList<Token> tokens){
+	/**public ArrayList<Token> getNestedExpression(int i, ArrayList<Token> tokens){
 		ArrayList<Token> nestedExpression = new ArrayList<>();
 		Token token = tokens.get(i);
 		while (token.getType() != Type.EOE) {
@@ -141,6 +107,28 @@ public class Parser {
 		}
 		nestedExpression.add(tokens.get(i));
 		return nestedExpression;
+	}**/
+	
+	public ExpressionNode expandQuote() {
+		Token listtkn = new Token(Type.SOE, "(");
+		SymbolNode quoteSymbol = new SymbolNode("quote", null);
+		ArrayList<ExpressionNode> argList = new ArrayList<>();
+		argList.add(0, quoteSymbol);
+		argList.add(1, getnextExpression(mTokens.get(mCurPosition))); 
+		return new ListNode(listtkn, argList);
+	}
+	
+	private ExpressionNode getnextExpression(Token token) {
+		if (token.getType() == Type.NUMBER) {
+			int number = Integer.valueOf(token.getValue());
+			return new NumberNode(number, new ArrayList<>());
+		} else if (token.getType() == Type.SYMBOL) {
+			String symbol = token.getValue();
+			return new SymbolNode(symbol, new ArrayList<>());
+		} else if (token.getType() == Type.SOE) {
+			return new ListNode(token, nodeList(mTokens));
+		}
+		return null;
 	}
 	
 	
