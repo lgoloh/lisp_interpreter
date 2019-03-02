@@ -12,9 +12,12 @@ public class ListNode extends ExpressionNode {
 	
 	@Override
 	public String toString() {
+		System.out.println(mNodes.size());
 		String resString = mNodes.get(0).getValue().toString();
 		for (int i = 1; i < mNodes.size(); i++) {
+			
 			resString+= " " + mNodes.get(i).toString();
+			//System.out.println(resString);
 		}
 		return "(" + resString + ")";
 	}

@@ -23,7 +23,7 @@ public class Tokenizer {
 		char character = 0;
 		if (mCurPosition == mInputString.length()) {
 			mCurPosition++;
-			return new Token(Type.EOF, null); 
+			return new Token(Type.EOF, "eof"); 
 		} else if (mCurPosition < mInputString.length()) {
 			 character = nextAfterWhitespace(mInputString);
 			 
