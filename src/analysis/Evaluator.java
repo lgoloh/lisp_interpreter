@@ -12,7 +12,7 @@ public class Evaluator {
 	
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
-			"list", "cons", "car", "cdr", "listp"};
+			"list", "cons", "car", "cdr", "listp", "nil"};
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
@@ -24,7 +24,7 @@ public class Evaluator {
 	 * @param node
 	 * @return
 	 */
-	public int evaluateNumber(NumberNode node) {
+	public int evaluateNumber(ExpressionNode node) {
 		return (int) node.getValue();
 	}
 	
@@ -47,20 +47,16 @@ public class Evaluator {
 				case "/":
 					return new Divide();
 				//returns the Quote operation object if ' or quote is used	
-				case "'"	:
-					//expands the quote operator to use the symbol quote
-					Token listtkn = new Token(Type.SOE, "(");
-					SymbolNode quoteSymbol = new SymbolNode("quote", null);
-					head.getnodeList().add(0, quoteSymbol);
-					ExpressionNode fullQuote = new ListNode(listtkn, head.getnodeList());
-					return  evaluateList(fullQuote);
+				case "list":
+					return new ListOperator();
 				case "quote":
 					//returns the actual Quote function that has the execution function
 					Quote quote = new Quote();
 					return quote;
 					
 				case "cons":
-					break;
+					Cons cons = new Cons();
+					return cons;
 			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
@@ -73,7 +69,7 @@ public class Evaluator {
 	 * @param listnode
 	 * @return
 	 */
-	public Object evaluateList(ExpressionNode listnode) {
+	public ExpressionNode evaluateList(ExpressionNode listnode) {
 		ArrayList<ExpressionNode> nodes = listnode.getnodeList();
 		ExpressionNode head = nodes.get(0);
 		if (head instanceof SymbolNode) {
@@ -86,15 +82,18 @@ public class Evaluator {
 				((Quote) operation).setExpression(listnode);
 				Quote quote = (Quote) operation;
 				ExpressionNode data = (ExpressionNode) quote.returnData();
-				return data.toString();
-			}
+				System.out.println("Quote result: " + data);
+				return data;
+			} else if (operation instanceof ListOperator) {
+				return evaluateListOperator(nodes);
+			} 
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
 			}
 			
-		return 0;
+		return new NumberNode(0, null);
 	} 
-	
+
 	
 	/**
 	 * Evaluates Math operations
@@ -104,7 +103,7 @@ public class Evaluator {
 	 * @param nodes
 	 * @return
 	 */
-	public int evaluateMath(BinOperator operation, ArrayList<ExpressionNode> nodes) {
+	public ExpressionNode evaluateMath(BinOperator operation, ArrayList<ExpressionNode> nodes) {
 		Stack<Integer> argStack = new Stack<Integer>();
 		Stack<Integer> tempStack = new Stack<Integer>();
 		if (nodes.size() > 1) {
@@ -113,7 +112,7 @@ public class Evaluator {
 				if (curNode instanceof NumberNode) {
 					tempStack.push(evaluateNumber((NumberNode) curNode));
 				} else if (curNode instanceof ListNode) {
-					tempStack.push((Integer) evaluateList(curNode));
+					tempStack.push((Integer) (evaluateList(curNode)).getValue());
 				}
 			} 
 			argStack = reverseStack(tempStack); 
@@ -122,36 +121,57 @@ public class Evaluator {
 				operation.setSecondParameter(argStack.pop());
 				int result = operation.evaluateOperation();
 				argStack.push(result);
-			}return (argStack.pop());
+			}return (new NumberNode(argStack.pop(), null));
 		} else if (nodes.size() == 1) {
 			if (operation instanceof Sum) {
-				return 0;
+				return new NumberNode(0, null);
 				} else if (operation instanceof Multiply) {
-				return 1;
+				return new NumberNode(1, null);
 				} else {
 				throw new InvalidInputError(operation.getClass() + " " + "has too few arguments");
 				}
 			}
-		return 0;	
+		return new NumberNode(0, null);	
 	}
+	
+	
+	public ExpressionNode evaluateCons(Cons cons, ExpressionNode input, ListNode list) {
+		
+		if (input instanceof NumberNode) {
+			
+		}
+		return null;
+	}
+	
 	
 	/**
-	 * Returns an ExpressionNode which could either be a NumberNode, SymbolNode or a ListNode
-	 * @param quote
-	 * @param arg -> SymbolNode
+	 * Evaluates the list function. Doesn't handle symbols
+	 * @param nodes
 	 * @return
 	 */
-	public ExpressionNode evaluateQuote(Quote quote, SymbolNode arg) {
-		return quote.returnData();
-	}
-	
-	
-	public ExpressionNode evaulateCons(ArrayList<ExpressionNode> arg) {
-		return null;
-	}
-	
-	public ExpressionNode evaluateList() {
-		return null;
+	public ExpressionNode evaluateListOperator(ArrayList<ExpressionNode> nodes) {
+		//System.out.println("Size of list: "+ nodes.size());
+		Token token = new Token(Type.SOE, "(");
+		ListNode resultList = new ListNode(token, new ArrayList<ExpressionNode>());
+		if (nodes.size() == 1) {
+			return new SymbolNode("nil", null);
+		} else if (nodes.size() > 1) {
+			for (int i = 1; i < nodes.size(); i++) {
+				ExpressionNode curNode = nodes.get(i);
+				if (curNode instanceof NumberNode) {
+					resultList.getnodeList().add(new NumberNode(evaluateNumber(curNode), null));
+				} else if (curNode instanceof ListNode) {
+					//System.out.println("CurNode is: "+curNode);
+					ExpressionNode result = (ExpressionNode) evaluateList(curNode);
+					System.out.println("Result is: "+result);
+					resultList.getnodeList().add(result);
+					System.out.println("Result2 is: "+result);
+				}
+				//System.out.println(resultList.getnodeList().get(0));
+			}
+		}
+		System.out.println("First element: "+ resultList.getnodeList().get(0));
+		return resultList;
 	}
 	
 	
