@@ -48,7 +48,7 @@ public class Parser {
 			} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
 			}
-		System.out.println(mSyntaxTree2.toString());
+		//System.out.println(mSyntaxTree2.toString());
 		return mSyntaxTree2;
 	}
 	

@@ -6,8 +6,7 @@ import util.Token;
 import util.Type;
 
 public class ExpressionNode {
-	
-	protected Token mToken;
+
 	protected Object mObject;
 	protected ArrayList<ExpressionNode> mNodes;
 
@@ -24,6 +23,10 @@ public class ExpressionNode {
 		mObject = object;
 	}
 	
+	public void setNodeList() {
+		mNodes = new ArrayList<>();
+	}
+	
 	public Object getValue() {
 		return mObject;
 	}
@@ -35,6 +38,7 @@ public class ExpressionNode {
 	
 	@Override
 	public String toString() {
-		return null;};
+		return null;
+	}
 	
 }

@@ -77,16 +77,23 @@ public class Evaluator {
 			Object operation = evaluateSymbol((SymbolNode) head);
 			//If the operation is a binary operation (+, -, /, *)
 			if (operation instanceof BinOperator) {		
-				return evaluateMath((BinOperator) operation, nodes);
-			} else if (operation instanceof Quote) {
+				return evaluateMath((BinOperator) operation, (SymbolNode) head, nodes);
+			} 
+			
+			else if (operation instanceof Quote) {
 				((Quote) operation).setExpression(listnode);
 				Quote quote = (Quote) operation;
 				ExpressionNode data = (ExpressionNode) quote.returnData();
-				System.out.println("Quote result: " + data);
 				return data;
-			} else if (operation instanceof ListOperator) {
+			} 
+			
+			else if (operation instanceof ListOperator) {
 				return evaluateListOperator(nodes);
 			} 
+			
+			else if (operation instanceof Cons && nodes.size() == 3) {
+				return evaluateCons((Cons) operation, nodes.get(1), (ListNode) nodes.get(2));
+			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
 			}
@@ -103,42 +110,87 @@ public class Evaluator {
 	 * @param nodes
 	 * @return
 	 */
-	public ExpressionNode evaluateMath(BinOperator operation, ArrayList<ExpressionNode> nodes) {
+	public ExpressionNode evaluateMath(BinOperator operation, SymbolNode op, ArrayList<ExpressionNode> nodes) {
 		Stack<Integer> argStack = new Stack<Integer>();
 		Stack<Integer> tempStack = new Stack<Integer>();
-		if (nodes.size() > 1) {
-			for (int i = 1; i < nodes.size(); i++) {
-				ExpressionNode curNode = nodes.get(i);
-				if (curNode instanceof NumberNode) {
-					tempStack.push(evaluateNumber((NumberNode) curNode));
-				} else if (curNode instanceof ListNode) {
-					tempStack.push((Integer) (evaluateList(curNode)).getValue());
-				}
-			} 
-			argStack = reverseStack(tempStack); 
-			while (argStack.size() != 1) {
-				operation.setFirstParameter(argStack.pop());
-				operation.setSecondParameter(argStack.pop());
-				int result = operation.evaluateOperation();
-				argStack.push(result);
-			}return (new NumberNode(argStack.pop(), null));
-		} else if (nodes.size() == 1) {
-			if (operation instanceof Sum) {
-				return new NumberNode(0, null);
-				} else if (operation instanceof Multiply) {
-				return new NumberNode(1, null);
-				} else {
-				throw new InvalidInputError(operation.getClass() + " " + "has too few arguments");
-				}
-			}
-		return new NumberNode(0, null);	
+		try {
+			if (nodes.size() > 1) {
+				for (int i = 1; i < nodes.size(); i++) {
+					ExpressionNode curNode = nodes.get(i);
+					if (curNode instanceof NumberNode) {
+						tempStack.push(evaluateNumber((NumberNode) curNode));
+					} else if (curNode instanceof ListNode) {
+						tempStack.push((Integer) (evaluateList(curNode)).getValue());
+					}
+				} 
+				argStack = reverseStack(tempStack); 
+				while (argStack.size() != 1) {
+					operation.setFirstParameter(argStack.pop());
+					operation.setSecondParameter(argStack.pop());
+					int result = operation.evaluateOperation();
+					argStack.push(result);
+				}return (new NumberNode(argStack.pop(), null));
+			} else if (nodes.size() == 1) {
+				if (operation instanceof Sum) {
+					return new NumberNode(0, null);
+					} else if (operation instanceof Multiply) {
+					return new NumberNode(1, null);
+					} else {
+					throw new EvalException(op + " " + "has too few arguments");
+					}
+				}		
+		} catch (ClassCastException e) {
+			System.out.print("Expecting a number as argument to " + op + " ");
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		return new NumberNode(0, null);
+			
 	}
 	
-	
+	/**
+	 * Evaluates Cons
+	 * Does not handle symbols(variables)
+	 * @param cons
+	 * @param input
+	 * @param list
+	 * @return
+	 */
 	public ExpressionNode evaluateCons(Cons cons, ExpressionNode input, ListNode list) {
-		
-		if (input instanceof NumberNode) {
-			
+		try {
+			ListNode data = getDataList(list);
+			ExpressionNode newValue = new ExpressionNode();
+			if (data != null) {
+				if (input instanceof NumberNode) {
+					newValue.setValue(evaluateNumber(input));
+					newValue.setNodeList();
+				} else if (input instanceof ListNode) {
+					newValue = evaluateList(input);
+				} else if (input instanceof SymbolNode) {
+					throw new EvalException(input + " " + "has no value");
+				}
+				cons.setInput(newValue);
+				cons.setList(data);
+				return cons.cons();
+			} else {
+				throw new EvalException(list + " " + "must be a list");
+			}
+		}catch(EvalException e) {
+			System.out.println(e);
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns ListNode that is a datalist
+	 * If evaluating the listNode returns a list 
+	 * @param list
+	 * @return
+	 */
+	private ListNode getDataList(ListNode list) {
+		ExpressionNode data = evaluateList(list);
+		if (data instanceof ListNode) {
+			return (ListNode) data;
 		}
 		return null;
 	}
@@ -150,7 +202,6 @@ public class Evaluator {
 	 * @return
 	 */
 	public ExpressionNode evaluateListOperator(ArrayList<ExpressionNode> nodes) {
-		//System.out.println("Size of list: "+ nodes.size());
 		Token token = new Token(Type.SOE, "(");
 		ListNode resultList = new ListNode(token, new ArrayList<ExpressionNode>());
 		if (nodes.size() == 1) {
@@ -161,16 +212,11 @@ public class Evaluator {
 				if (curNode instanceof NumberNode) {
 					resultList.getnodeList().add(new NumberNode(evaluateNumber(curNode), null));
 				} else if (curNode instanceof ListNode) {
-					//System.out.println("CurNode is: "+curNode);
 					ExpressionNode result = (ExpressionNode) evaluateList(curNode);
-					System.out.println("Result is: "+result);
-					resultList.getnodeList().add(result);
-					System.out.println("Result2 is: "+result);
+					resultList.getnodeList().add(result);	
 				}
-				//System.out.println(resultList.getnodeList().get(0));
 			}
 		}
-		System.out.println("First element: "+ resultList.getnodeList().get(0));
 		return resultList;
 	}
 	
