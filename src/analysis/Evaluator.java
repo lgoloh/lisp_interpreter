@@ -34,7 +34,7 @@ public class Evaluator {
 	 * @param head
 	 * @return
 	 */
-	public Object evaluateSymbol(SymbolNode head) {
+	public Object evaluateSymbol(ExpressionNode head) {
 		String operator = (String) head.getValue();
 		if (isValidOperator(operator)) {
 			switch(operator) {
@@ -57,6 +57,14 @@ public class Evaluator {
 				case "cons":
 					Cons cons = new Cons();
 					return cons;
+				case "nil":
+					Token token = new Token(Type.SOE, "(");
+					ListNode emptyList = new ListNode(token, new ArrayList<>());
+					return emptyList;
+				case "car":
+					return new Car();
+				case "cdr":
+					return new Cdr();
 			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
@@ -71,33 +79,44 @@ public class Evaluator {
 	 */
 	public ExpressionNode evaluateList(ExpressionNode listnode) {
 		ArrayList<ExpressionNode> nodes = listnode.getnodeList();
-		ExpressionNode head = nodes.get(0);
-		if (head instanceof SymbolNode) {
-			//Returns an operation object after the Symbol is evaluated
-			Object operation = evaluateSymbol((SymbolNode) head);
-			//If the operation is a binary operation (+, -, /, *)
-			if (operation instanceof BinOperator) {		
-				return evaluateMath((BinOperator) operation, (SymbolNode) head, nodes);
-			} 
-			
-			else if (operation instanceof Quote) {
-				((Quote) operation).setExpression(listnode);
-				Quote quote = (Quote) operation;
-				ExpressionNode data = (ExpressionNode) quote.returnData();
-				return data;
-			} 
-			
-			else if (operation instanceof ListOperator) {
-				return evaluateListOperator(nodes);
-			} 
-			
-			else if (operation instanceof Cons && nodes.size() == 3) {
-				return evaluateCons((Cons) operation, nodes.get(1), (ListNode) nodes.get(2));
-			}
+		if (nodes.size() >= 1) {
+			ExpressionNode head = nodes.get(0);
+			if (head instanceof SymbolNode) {
+				//Returns an operation object after the Symbol is evaluated
+				Object operation = evaluateSymbol((SymbolNode) head);
+				//If the operation is a binary operation (+, -, /, *)
+				if (operation instanceof BinOperator) {		
+					return evaluateMath((BinOperator) operation, (SymbolNode) head, nodes);
+				} 
+				
+				else if (operation instanceof Quote) {
+					((Quote) operation).setExpression(listnode);
+					Quote quote = (Quote) operation;
+					ExpressionNode data = (ExpressionNode) quote.returnData();
+					return data;
+				} 
+				
+				else if (operation instanceof ListOperator) {
+					return evaluateListOperator(nodes);
+				} 
+				
+				else if (operation instanceof Cons && nodes.size() == 3) {
+					return evaluateCons((Cons) operation, nodes.get(1), nodes.get(2));
+				}
+				
+				else if (operation instanceof Car) {
+					return evaluateCar((Car) operation, nodes.get(1));
+				}
+				
+				else if (operation instanceof Cdr) {
+					return evaluateCdr((Cdr) operation, nodes.get(1));
+				}
+			} else {
+				throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
+				}
 		} else {
-			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");
-			}
-			
+			return new SymbolNode("nil", null);
+		}	
 		return new NumberNode(0, null);
 	} 
 
@@ -144,9 +163,49 @@ public class Evaluator {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-		return new NumberNode(0, null);
-			
+		return new NumberNode(0, null);		
 	}
+	
+	
+	/**
+	 * Evaluates Car
+	 * @param car
+	 * @param list
+	 * @return
+	 */
+	public ExpressionNode evaluateCar(Car car, ExpressionNode list) {
+		try {
+			ListNode data = getDataList(list);
+			if (data != null) {
+				car.setList(data);
+				return car.eval();
+			}
+		}catch (Exception e) {
+			
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Evaluates Cdr
+	 * @param cdr
+	 * @param list
+	 * @return
+	 */
+	public ExpressionNode evaluateCdr(Cdr cdr, ExpressionNode list) {
+		try {
+			ListNode data = getDataList(list);
+			if (data != null) {
+				cdr.setList(data);
+				return cdr.eval();
+			}
+		}catch (Exception e) {
+			
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * Evaluates Cons
@@ -156,7 +215,7 @@ public class Evaluator {
 	 * @param list
 	 * @return
 	 */
-	public ExpressionNode evaluateCons(Cons cons, ExpressionNode input, ListNode list) {
+	public ExpressionNode evaluateCons(Cons cons, ExpressionNode input, ExpressionNode list) {
 		try {
 			ListNode data = getDataList(list);
 			ExpressionNode newValue = new ExpressionNode();
@@ -187,8 +246,13 @@ public class Evaluator {
 	 * @param list
 	 * @return
 	 */
-	private ListNode getDataList(ListNode list) {
-		ExpressionNode data = evaluateList(list);
+	private ListNode getDataList(ExpressionNode list) {
+		ExpressionNode data = new ExpressionNode();
+		if (list instanceof ListNode) {
+			data = evaluateList(list);
+		} else if (list instanceof SymbolNode && list.getValue().equals("nil")) {
+			data = (ExpressionNode) evaluateSymbol(list);
+		}
 		if (data instanceof ListNode) {
 			return (ListNode) data;
 		}
