@@ -1,6 +1,5 @@
 package util;
 
-import java.util.regex.Pattern;
 
 public enum Type {
 	SOE ("SOE"),

@@ -14,8 +14,9 @@ public class Main {
 	public static void main(String[] args) throws IOException
 	{	
 		while (true) {
-			System.out.println("CL-Lisp > ");
-			mInput = read();
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("CL-Lisp > ");
+			mInput = read(scanner);
 			if (matchParentheses(mInput)) {
 				Tokenizer tokenizer = new Tokenizer(mInput);
 				ArrayList<Token> tokenizedInput = tokenizer.allTokens();
@@ -29,14 +30,12 @@ public class Main {
 			}
 		}
 	
-	public static String read() {
+	public static String read(Scanner scanner) {
 		if (mInput == null) {
-			Scanner in = new Scanner(System.in);
-			mInput = in.nextLine();
+			mInput = scanner.nextLine();
 			}
 		while (mInput != null && !(matchParentheses(mInput))) {
-			Scanner in = new Scanner(System.in);
-			mInput+= " " + in.nextLine();
+			mInput+= " " + scanner.nextLine();
 			}
 		return mInput;
 		}

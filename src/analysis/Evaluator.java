@@ -12,7 +12,7 @@ public class Evaluator {
 	
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
-			"list", "cons", "car", "cdr", "listp", "nil"};
+			"list", "cons", "car", "cdr", "listp", "nil", "T"};
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
@@ -65,6 +65,8 @@ public class Evaluator {
 					return new Car();
 				case "cdr":
 					return new Cdr();
+				case "T":
+					break;
 			}
 		} else {
 			throw new InvalidInputError(head.getValue() + " " + "is not a Valid Symbol");

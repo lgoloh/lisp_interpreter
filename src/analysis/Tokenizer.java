@@ -176,7 +176,7 @@ public class Tokenizer {
 		Token token = this.getNextToken();
 		while (token.getType() != Type.EOF) {
 			allTokens.add(token);
-			System.out.println(token);
+			//System.out.println(token);
 			token = this.getNextToken();
 			
 		}
