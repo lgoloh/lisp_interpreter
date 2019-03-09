@@ -68,6 +68,8 @@ public class Evaluator {
 						return head;
 					case "listp":
 						return new ListP();
+					case "null":
+						return head;
 				}
 			} else {
 				throw new EvalException(head.getValue() + " " + "is not a Valid Symbol");
@@ -127,6 +129,16 @@ public class Evaluator {
 						} else {
 							return evaluateListP(nodes.get(1));
 						}	
+						
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("null")) {
+						if (nodes.size() > 2) {
+							throw new EvalException("too many arguments given to NULL " + listnode);
+						} else {
+							return evaluateNull(nodes.get(1));
+						}
 					}
 				} 
 				//the empty list
@@ -272,14 +284,10 @@ public class Evaluator {
 	 */
 	private ListNode getDataList(ExpressionNode list) {
 		ExpressionNode data = new ExpressionNode();
-		if (list instanceof ListNode) {
+		if (list instanceof ListNode && !(((ListNode) list).isEmpty())) {
 			data = evaluateList(list);
-			//if the list is the empty ()
-			if (data instanceof SymbolNode && data.getValue().equals("nil")) {
-				Token token = new Token(Type.SOE, "(");
-				ListNode emptyList = new ListNode(token, new ArrayList<>());
-				data = emptyList;
-			}
+		} else if (list instanceof ListNode && ((ListNode) list).isEmpty()) {
+			data = list;
 		} else if (list instanceof SymbolNode && list.getValue().equals("nil")) {
 			Token token = new Token(Type.SOE, "(");
 			ListNode emptyList = new ListNode(token, new ArrayList<>());
@@ -338,6 +346,18 @@ public class Evaluator {
 		return new SymbolNode("nil", null);
 	}
 	
+	/**
+	 * Evaluates null
+	 * @param arg
+	 * @return
+	 */
+	private ExpressionNode evaluateNull(ExpressionNode arg) {
+		if ((arg instanceof SymbolNode && ((SymbolNode) arg).getValue().equals("nil"))
+				|| arg instanceof ListNode && ((ListNode) arg).isEmpty()) {
+			return new SymbolNode("T", null);
+		}
+		return new SymbolNode("nil", null);
+	}
 	
 
 	public static <T> Stack<T> reverseStack(Stack<T> stack) {

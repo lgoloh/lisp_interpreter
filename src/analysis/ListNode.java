@@ -20,7 +20,13 @@ public class ListNode extends ExpressionNode {
 			return "(" + resString + ")";
 		} else {
 			return "(" + ")";
+		}	
+	}
+	
+	public boolean isEmpty() {
+		if (mNodes.size() == 0) {
+			return true;
 		}
-		
+		return false;
 	}
 }
