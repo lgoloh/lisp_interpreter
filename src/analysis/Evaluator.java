@@ -12,7 +12,7 @@ public class Evaluator {
 	
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
-			"list", "cons", "car", "cdr", "listp", "nil", "T", "null", "if"};
+			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", "and", "or"};
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
@@ -54,7 +54,6 @@ public class Evaluator {
 						//returns the actual Quote function that has the execution function
 						Quote quote = new Quote();
 						return quote;
-						
 					case "cons":
 						Cons cons = new Cons();
 						return cons;
@@ -71,6 +70,10 @@ public class Evaluator {
 					case "null":
 						return head;
 					case "if":
+						return head;
+					case "and":
+						return head;
+					case "or":
 						return head;
 				}
 			} else {
@@ -155,6 +158,22 @@ public class Evaluator {
 						} else if (nodes.size() > 4) {
 							throw new EvalException("too many arguments for special operator IF " + listnode);
 						}
+					}
+					
+					else if (operation instanceof SymbolNode
+							&& ((SymbolNode) operation).getValue().equals("and")) {
+						nodes.remove(0);
+						ArrayList<ExpressionNode> argList = new ArrayList<>();
+						argList.addAll(nodes);
+						return evaluateAnd(argList);
+					}
+					
+					else if (operation instanceof SymbolNode
+							&& ((SymbolNode) operation).getValue().equals("or")) {
+						nodes.remove(0);
+						ArrayList<ExpressionNode> argList = new ArrayList<>();
+						argList.addAll(nodes);
+						return evaluateOr(argList);
 					}
 				} 
 				//the empty list
@@ -399,14 +418,60 @@ public class Evaluator {
 		}
 	}
 	
+	/**
+	 * Evaluates and
+	 * @param nodeList
+	 * @return
+	 */
+	private ExpressionNode evaluateAnd(ArrayList<ExpressionNode> nodeList) {
+		if (nodeList.size() > 0) {
+			ExpressionNode result = evaluateExpr(nodeList.get(0));
+			int i = 1;
+			while (!(result instanceof SymbolNode
+					&& ((SymbolNode) result).getValue().equals("nil")) && i < nodeList.size()) {
+				result = evaluateExpr(nodeList.get(i));
+				i++;
+			}
+			return result;
+		} else if (nodeList.size() == 0) {
+			return new SymbolNode("t", null);
+		}
+		return null;
+	}
 	
+	
+	private ExpressionNode evaluateOr(ArrayList<ExpressionNode> nodeList) {
+		if (nodeList.size() > 0) {
+			ExpressionNode result = new ExpressionNode();
+			for (int i = 0; i < nodeList.size();) {
+				result = evaluateExpr(nodeList.get(i));
+				if (!(result instanceof SymbolNode
+					&& ((SymbolNode) result).getValue().equals("nil"))) {
+					return result;
+				} else {
+					i++;
+				}
+			}
+		} else if (nodeList.size() == 0) {
+			return new SymbolNode("nil", null);
+		}
+		return null;
+	}
+	
+	/**
+	 * Evaluates a ListNode or NumberNode
+	 * @param node
+	 * @return
+	 */
 	private ExpressionNode evaluateExpr(ExpressionNode node) {
 		ExpressionNode result = new ExpressionNode();
 		if (node instanceof NumberNode) {
 			result = evaluateNumber(node);
 		} else if (node instanceof ListNode) {
 			result = evaluateList(node);
-		}	
+		} else if (node instanceof SymbolNode) {
+			result = (ExpressionNode) evaluateSymbol(node);
+		}
 		return result;	
 	}
 	
