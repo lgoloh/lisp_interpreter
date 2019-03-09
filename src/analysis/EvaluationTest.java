@@ -40,4 +40,9 @@ public class EvaluationTest {
 		
 	}
 	
+	@Test
+	void assertemptyList() {
+		
+	}
+	
 }

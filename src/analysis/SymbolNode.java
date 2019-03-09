@@ -10,6 +10,7 @@ public class SymbolNode extends ExpressionNode {
 	
 	@Override
 	public String toString() {
-		return (String) mObject;
+		return ((String) mObject).toUpperCase();
 	}
+	
 }
