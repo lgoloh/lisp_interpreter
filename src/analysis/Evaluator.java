@@ -12,7 +12,7 @@ public class Evaluator {
 	
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
-			"list", "cons", "car", "cdr", "listp", "nil", "T", "null"};
+			"list", "cons", "car", "cdr", "listp", "nil", "T", "null", "if"};
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
@@ -24,8 +24,8 @@ public class Evaluator {
 	 * @param node
 	 * @return
 	 */
-	public int evaluateNumber(ExpressionNode node) {
-		return (int) node.getValue();
+	public ExpressionNode evaluateNumber(ExpressionNode node) {
+		return node;
 	}
 	
 	/**
@@ -64,11 +64,13 @@ public class Evaluator {
 						return new Car();
 					case "cdr":
 						return new Cdr();
-					case "T":
+					case "t":
 						return head;
 					case "listp":
 						return new ListP();
 					case "null":
+						return head;
+					case "if":
 						return head;
 				}
 			} else {
@@ -140,6 +142,20 @@ public class Evaluator {
 							return evaluateNull(nodes.get(1));
 						}
 					}
+					
+					else if (operation instanceof SymbolNode
+							&& ((SymbolNode) operation).getValue().equals("if")) {
+						if (nodes.size() == 3 || nodes.size() == 4) {
+							nodes.remove(0);
+							ArrayList<ExpressionNode> argList = new ArrayList<>();
+							argList.addAll(nodes);
+							return evaluateIf(argList);
+						} else if (nodes.size() < 3){
+							throw new EvalException("too few arguments for special operator IF " + listnode);
+						} else if (nodes.size() > 4) {
+							throw new EvalException("too many arguments for special operator IF " + listnode);
+						}
+					}
 				} 
 				//the empty list
 			} else {
@@ -168,7 +184,7 @@ public class Evaluator {
 				for (int i = 1; i < nodes.size(); i++) {
 					ExpressionNode curNode = nodes.get(i);
 					if (curNode instanceof NumberNode) {
-						tempStack.push(evaluateNumber((NumberNode) curNode));
+						tempStack.push((Integer) evaluateNumber((NumberNode) curNode).getValue());
 					} else if (curNode instanceof ListNode) {
 						tempStack.push((Integer) (evaluateList(curNode)).getValue());
 					}
@@ -316,7 +332,7 @@ public class Evaluator {
 					ExpressionNode curNode = nodes.get(i);
 					//If the expression is a number
 					if (curNode instanceof NumberNode) {
-						resultList.getnodeList().add(new NumberNode(evaluateNumber(curNode), null));
+						resultList.getnodeList().add(curNode);
 					//if the expression is a ListNode 
 					} else if (curNode instanceof ListNode) {
 						ExpressionNode result = (ExpressionNode) evaluateList(curNode);
@@ -355,8 +371,43 @@ public class Evaluator {
 		if ((arg instanceof SymbolNode && ((SymbolNode) arg).getValue().equals("nil"))
 				|| arg instanceof ListNode && ((ListNode) arg).isEmpty()) {
 			return new SymbolNode("T", null);
+		} else if (arg instanceof ListNode) {
+			ExpressionNode data = evaluateList(arg);
+			if (data instanceof ListNode && ((ListNode) data).isEmpty()) {
+				return new SymbolNode("T", null);
+			}
 		}
 		return new SymbolNode("nil", null);
+	}
+	
+	/**
+	 * Evaluate If
+	 * @param nodeList
+	 * @return
+	 */
+	private ExpressionNode evaluateIf(ArrayList<ExpressionNode> nodeList) {
+		ExpressionNode result = new ExpressionNode();
+		result = evaluateExpr(nodeList.get(0));
+		if (result instanceof SymbolNode
+				&& ((SymbolNode) result).getValue().equals("nil") && nodeList.size() == 3) {
+			return evaluateExpr(nodeList.get(2));
+		} else if (result instanceof SymbolNode
+				&& ((SymbolNode) result).getValue().equals("nil") && nodeList.size() == 2) {
+			return result;
+		} else {
+			return evaluateExpr(nodeList.get(1));
+		}
+	}
+	
+	
+	private ExpressionNode evaluateExpr(ExpressionNode node) {
+		ExpressionNode result = new ExpressionNode();
+		if (node instanceof NumberNode) {
+			result = evaluateNumber(node);
+		} else if (node instanceof ListNode) {
+			result = evaluateList(node);
+		}	
+		return result;	
 	}
 	
 

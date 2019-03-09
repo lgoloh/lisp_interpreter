@@ -114,7 +114,6 @@ public class Parser {
 	
 	public ExpressionNode expandQuote() {
 		mCurPosition++;
-		System.out.println("hello");
 		//System.out.println(mTokens.get(mCurPosition));
 		Token listtkn = new Token(Type.SOE, "(");
 		SymbolNode quoteSymbol = new SymbolNode("quote", null);
