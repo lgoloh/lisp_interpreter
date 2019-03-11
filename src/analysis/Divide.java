@@ -4,16 +4,21 @@ public class Divide extends BinOperator {
 	
 	public Divide() {}
 	
-	public Divide(int a, int b) {
+	public Divide(ExpressionNode a, ExpressionNode b) {
 		super(a, b);
 	}
 	
 	@Override
-	public int evaluateOperation() {
-		if (mParam2 != 0) {
-			return mParam1 / mParam2;
-		} else {
-		throw new IllegalArgumentException("Argument 'divisor' is 0");
+	public ExpressionNode evaluateOperation() {
+		try {
+			if ((int)mParam2.getValue() != 0) {
+				return new NumberNode(((int)mParam1.getValue() / (int) mParam2.getValue()), null);
+			} else {
+			throw new EvalException("Argument 'divisor' is 0");
+			}
+		}catch(EvalException e) {
+			System.out.println(e);
 		}
+		return new NumberNode(0, null);
 	}
 }

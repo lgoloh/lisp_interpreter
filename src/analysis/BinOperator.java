@@ -1,30 +1,27 @@
 package analysis;
 
-import java.util.ArrayList;
-
-import util.Token;
 
 public class BinOperator {
 	
-	protected int mParam1;
-	protected int mParam2;
+	protected ExpressionNode mParam1;
+	protected ExpressionNode mParam2;
 	
 	public BinOperator() {}
 	
-	public BinOperator(int a, int b) {
+	public BinOperator(ExpressionNode a, ExpressionNode b) {
 		mParam1 = a;
 		mParam2 = b;
 	}
 	
-	public int evaluateOperation() {
-		return (mParam1 + mParam2);
+    public ExpressionNode evaluateOperation() {
+		return new ExpressionNode();
 	}
 	
-	public void setFirstParameter(int a) {
+	public void setFirstParameter(ExpressionNode a) {
 		mParam1 = a;
 	}
 	
-	public void setSecondParameter(int b) {
+	public void setSecondParameter(ExpressionNode b) {
 		mParam2 = b;
 	}	
 	

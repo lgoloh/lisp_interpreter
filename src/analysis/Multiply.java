@@ -4,13 +4,13 @@ public class Multiply extends BinOperator{
 	
 	public Multiply() {}
 	
-	public Multiply(int a, int b) {
+	public Multiply(ExpressionNode a, ExpressionNode b) {
 		super(a, b);
 	}
 	
 	@Override
-	public int evaluateOperation() {
-		return (mParam1 * mParam2);
+	public ExpressionNode evaluateOperation() {
+		return new NumberNode(((int) mParam1.getValue() * (int)mParam2.getValue()), null);
 	}
 	
 }

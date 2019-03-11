@@ -12,7 +12,8 @@ public class Evaluator {
 	
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
-			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", "and", "or"};
+			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", 
+			"and", "or", "<", ">", "<=", ">=", "=", "/="};
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
@@ -38,6 +39,10 @@ public class Evaluator {
 		String operator = (String) head.getValue();
 		try {
 			if (isValidOperator(operator)) {
+				if (operator.equals("<") || operator.equals(">") 
+						|| operator.equals(">=") || operator.equals("<=")) {
+					return new ComparisonOperator(operator);
+				}
 				switch(operator) {
 					case "+":
 						return new Sum();
@@ -196,25 +201,25 @@ public class Evaluator {
 	 * @return
 	 */
 	private ExpressionNode evaluateMath(BinOperator operation, SymbolNode op, ArrayList<ExpressionNode> nodes) {
-		Stack<Integer> argStack = new Stack<Integer>();
-		Stack<Integer> tempStack = new Stack<Integer>();
+		Stack<ExpressionNode> argStack = new Stack<ExpressionNode>();
+		Stack<ExpressionNode> tempStack = new Stack<ExpressionNode>();
 		try {
 			if (nodes.size() > 1) {
 				for (int i = 1; i < nodes.size(); i++) {
 					ExpressionNode curNode = nodes.get(i);
 					if (curNode instanceof NumberNode) {
-						tempStack.push((Integer) evaluateNumber((NumberNode) curNode).getValue());
+						tempStack.push(curNode);
 					} else if (curNode instanceof ListNode) {
-						tempStack.push((Integer) (evaluateList(curNode)).getValue());
+						tempStack.push(evaluateList(curNode));
 					}
 				} 
 				argStack = reverseStack(tempStack); 
 				while (argStack.size() != 1) {
 					operation.setFirstParameter(argStack.pop());
 					operation.setSecondParameter(argStack.pop());
-					int result = operation.evaluateOperation();
+					ExpressionNode result = operation.evaluateOperation();
 					argStack.push(result);
-				}return (new NumberNode(argStack.pop(), null));
+				}return argStack.pop();
 			} else if (nodes.size() == 1) {
 				if (operation instanceof Sum) {
 					return new NumberNode(0, null);
@@ -231,6 +236,8 @@ public class Evaluator {
 		}
 		return new NumberNode(0, null);		
 	}
+	
+	//private ExpressionNode evaluateComparison(String operator, ExpressionNode first, ExpressionNode second) {
 	
 	
 	/**
