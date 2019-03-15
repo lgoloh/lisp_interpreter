@@ -14,6 +14,8 @@ public class Evaluator {
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
 			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", 
 			"and", "or", "<", ">", "<=", ">=", "=", "/="};
+	//The Global Scope 
+	private static final Scope mGlobalScope = new Scope("Global");
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
@@ -80,6 +82,8 @@ public class Evaluator {
 						return head;
 					case "or":
 						return head;
+					case "defun":
+						break;
 				}
 			} else {
 				throw new EvalException(head.getValue() + " " + "is not a Valid Symbol");
@@ -94,6 +98,7 @@ public class Evaluator {
 	
 	/**
 	 * Evaluates a single ListNode
+	 * Should take a Scope object that 
 	 * @param listnode
 	 * @return
 	 */
