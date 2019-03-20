@@ -193,9 +193,13 @@ public class Evaluator {
 					else if (operation instanceof SymbolNode 
 							&& ((SymbolNode) operation).getValue().equals("defun")) {
 						SymbolNode funcname = (SymbolNode) nodes.get(1);
-						int paramcount = nodes.get(2).getnodeList().size();
+						ArrayList<ExpressionNode> paramlist = nodes.get(2).getnodeList();
+						int paramcount = paramlist.size();
 						ExpressionNode body = nodes.get(3);
 						FunctionStruct function = new FunctionStruct(paramcount, body);
+						for (ExpressionNode variable : paramlist) {
+							function.addParam((SymbolNode) variable);
+						}
 						mGlobalScope.getVariables().put(funcname, function);
 						return funcname;
 					}
@@ -204,7 +208,18 @@ public class Evaluator {
 						int paramcount = nodes.size() - 1;
 						//if the number of parameters passed to the function 
 						//is equal to the number of parameters in the FunctionStruct
+						//Initialize new scope, parent set to GlobalScope
 						if (paramcount == ((FunctionStruct) operation).getParamCount()) {
+							Scope functionscope = new Scope(head.toString());
+							functionscope.setParentScope(mGlobalScope);
+							ArrayList<SymbolNode> paramlist = ((FunctionStruct) operation).getParamList();
+							int i = 1;
+							for (SymbolNode variable : paramlist) {
+								functionscope.getVariables().put(variable, nodes.get(i));
+								i++;
+							}
+							//The execution context which takes the function's Scope and FunctionStruct
+							ExecutionContext env = new ExecutionContext(functionscope, (FunctionStruct) operation);
 							
 						}
 					}
