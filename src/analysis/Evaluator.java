@@ -13,7 +13,7 @@ public class Evaluator {
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
 			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", 
-			"and", "or", "<", ">", "<=", ">=", "=", "/="};
+			"and", "or", "<", ">", "<=", ">=", "=", "/=", "defun"};
 	//The Global Scope 
 	private static final Scope mGlobalScope = new Scope("Global");
 	
@@ -43,8 +43,8 @@ public class Evaluator {
 			if (isValidOperator(operator)) {
 				if (operator.equals("<") || operator.equals(">") 
 						|| operator.equals(">=") || operator.equals("<=")) {
-					return new ComparisonOperator(operator);
-				}
+					return new ComparisonOperator(operator);	
+				} 
 				switch(operator) {
 					case "+":
 						return new Sum();
@@ -83,8 +83,12 @@ public class Evaluator {
 					case "or":
 						return head;
 					case "defun":
-						break;
+						return head;
 				}
+			//checking for user-defined functions in the global scope 
+			//returns the FunctionStruct of the function	
+			} else if (mGlobalScope.getVariables().containsKey(head)){
+				return mGlobalScope.getVariables().get(head);
 			} else {
 				throw new EvalException(head.getValue() + " " + "is not a Valid Symbol");
 			}
@@ -184,6 +188,25 @@ public class Evaluator {
 						ArrayList<ExpressionNode> argList = new ArrayList<>();
 						argList.addAll(nodes);
 						return evaluateOr(argList);
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("defun")) {
+						SymbolNode funcname = (SymbolNode) nodes.get(1);
+						int paramcount = nodes.get(2).getnodeList().size();
+						ExpressionNode body = nodes.get(3);
+						FunctionStruct function = new FunctionStruct(paramcount, body);
+						mGlobalScope.getVariables().put(funcname, function);
+						return funcname;
+					}
+					//handles user defined functions
+					else if (operation instanceof FunctionStruct) {
+						int paramcount = nodes.size() - 1;
+						//if the number of parameters passed to the function 
+						//is equal to the number of parameters in the FunctionStruct
+						if (paramcount == ((FunctionStruct) operation).getParamCount()) {
+							
+						}
 					}
 				} 
 				//the empty list

@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class Scope {
 	
-	private HashMap<SymbolNode, ExpressionNode> mScopeVariables;
+	private HashMap<SymbolNode, Object> mScopeVariables;
 	private String mScopeName;
 	private Scope mParentScope;
 	
@@ -19,8 +19,8 @@ public class Scope {
 		mScopeVariables.put(var, value);
 	}
 	
-	public ExpressionNode lookupVar(SymbolNode variable) {
-		ExpressionNode value = new ExpressionNode();
+	public Object lookupVar(SymbolNode variable) {
+		Object value = null;
 		try {
 			if (mScopeVariables.containsKey(variable)) {
 				value = mScopeVariables.get(variable);
@@ -37,7 +37,7 @@ public class Scope {
 		return mScopeName;
 	}
 	
-	public HashMap<SymbolNode, ExpressionNode> getVariables() {
+	public HashMap<SymbolNode, Object> getVariables() {
 		return mScopeVariables;
 	}
 	

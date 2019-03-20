@@ -114,12 +114,18 @@ public class Parser {
 	
 	public ExpressionNode expandQuote() {
 		mCurPosition++;
-		//System.out.println(mTokens.get(mCurPosition));
+		//System.out.println(mTokens);
 		Token listtkn = new Token(Type.SOE, "(");
 		SymbolNode quoteSymbol = new SymbolNode("quote", null);
 		ArrayList<ExpressionNode> argList = new ArrayList<>();
 		argList.add(0, quoteSymbol);
-		argList.add(1, getcurExpression(mTokens.get(mCurPosition))); 
+		if (mTokens.get(mCurPosition).getValue().equals("'"))
+		{
+			argList.add(1, expandQuote()); 
+		} else {
+			argList.add(1, getcurExpression(mTokens.get(mCurPosition))); 
+		}
+		//System.out.println(new ListNode(listtkn, argList));
 		return new ListNode(listtkn, argList);
 	}
 	

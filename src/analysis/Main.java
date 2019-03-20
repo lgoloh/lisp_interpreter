@@ -23,6 +23,12 @@ public class Main {
 				Parser parser = new Parser(tokenizedInput);
 				ExpressionNode syntaxTree = parser.generateSyntaxTree();
 				Evaluator evaluator = new Evaluator(syntaxTree);
+				/**
+				try {
+					
+				} catch(EvalException e) {
+					System.out.println(e);
+				} **/
 				System.out.println(evaluator.evaluateTree());
 				mInput = null;
 				continue;

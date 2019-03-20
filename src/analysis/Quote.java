@@ -23,7 +23,6 @@ public class Quote {
 		} else if (mQuoteNode.getnodeList().get(1) instanceof NumberNode) {
 			return (NumberNode) mQuoteNode.getnodeList().get(1);
 		} else if (mQuoteNode.getnodeList().get(1) instanceof ListNode) {
-			
 			return (ListNode) mQuoteNode.getnodeList().get(1);
 		}
 		return null;
