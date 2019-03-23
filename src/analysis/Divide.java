@@ -11,10 +11,10 @@ public class Divide extends BinOperator {
 	@Override
 	public ExpressionNode evaluateOperation() {
 		try {
-			if ((int)mParam2.getValue() != 0) {
+			if ((int)mParam2.getValue() != 0 && mParam2 != null) {
 				return new NumberNode(((int)mParam1.getValue() / (int) mParam2.getValue()), null);
 			} else {
-			throw new EvalException("Argument 'divisor' is 0");
+				throw new EvalException("Argument 'divisor' is 0");
 			}
 		}catch(EvalException e) {
 			System.out.println(e);

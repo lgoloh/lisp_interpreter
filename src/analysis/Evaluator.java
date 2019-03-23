@@ -13,7 +13,7 @@ public class Evaluator {
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
 			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", 
-			"and", "or", "<", ">", "<=", ">=", "=", "/=", "defun"};
+			"and", "or", "<", ">", "<=", ">=", "=", "/=", "defun", "let", "setq"};
 	//The Global Scope 
 	private Scope mGlobalScope = new Scope("Global");
 	private ExecutionContext mGlobalExecutionContext = new ExecutionContext(); 
@@ -329,12 +329,12 @@ public class Evaluator {
 					}
 				} 
 				argStack = reverseStack(tempStack); 
-				while (argStack.size() != 1) {
-					operation.setFirstParameter(argStack.pop());
-					operation.setSecondParameter(argStack.pop());
-					ExpressionNode result = operation.evaluateOperation();
-					argStack.push(result);
-				}return argStack.pop();
+				if (argStack.size() > 1) {
+					return evalStack(operation, argStack);
+				} else if (argStack.size() == 1 && operation instanceof Divide) {
+					throw new EvalException("/ takes two arguments");
+				}
+				
 			} else if (nodes.size() == 1) {
 				if (operation instanceof Sum) {
 					return new NumberNode(0, null);
@@ -351,6 +351,18 @@ public class Evaluator {
 		}
 		//System.out.println("Is here2");
 		return new NumberNode(0, null);		
+	}
+	
+	
+	
+	private ExpressionNode evalStack(BinOperator operation, Stack<ExpressionNode> arguments) {
+		while (arguments.size() != 1) {
+			operation.setFirstParameter(arguments.pop());
+			operation.setSecondParameter(arguments.pop());
+			ExpressionNode result = operation.evaluateOperation();
+			arguments.push(result);
+		}
+		return arguments.pop();
 	}
 	
 	//private ExpressionNode evaluateComparison(String operator, ExpressionNode first, ExpressionNode second) {

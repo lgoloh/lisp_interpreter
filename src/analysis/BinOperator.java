@@ -3,8 +3,8 @@ package analysis;
 
 public class BinOperator {
 	
-	protected ExpressionNode mParam1;
-	protected ExpressionNode mParam2;
+	protected ExpressionNode mParam1 = null;
+	protected ExpressionNode mParam2 = null;
 	
 	public BinOperator() {}
 	
