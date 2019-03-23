@@ -104,12 +104,12 @@ public class Evaluator {
 			//checking for user-defined functions in the global scope 
 			//returns the FunctionStruct of the function	
 			} else {
-				System.out.println(head);
-				//System.out.println("The Global Scope " + mGlobalScope);
+				//System.out.println(head);
+				System.out.println("The Current Scope " + mCurScope.getScope());
 				//System.out.println("This is head " + mGlobalScope.getVariables());
 				return mCurScope.lookup((SymbolNode) head);
 			}
-		System.out.println(mGlobalScope.getVariables());
+		//System.out.println(mGlobalScope.getVariables());
 		return null;
 	}
 	
@@ -124,8 +124,8 @@ public class Evaluator {
 		try {
 			if (nodes.size() >= 1) {
 				ExpressionNode head = nodes.get(0);
-				System.out.println(head);
-				System.out.println(mGlobalScope.getVariables());
+				//System.out.println(head);
+				//System.out.println(mGlobalScope.getVariables());
 				if (head instanceof SymbolNode) {
 					//Returns an operation object after the Symbol is evaluated
 					Object operation = evaluateSymbol((SymbolNode) head);
@@ -225,7 +225,7 @@ public class Evaluator {
 					//handles user defined functions
 					else if (operation instanceof FunctionStruct) {
 						int paramcount = nodes.size() - 1;
-						System.out.println("Execution is here");
+						//System.out.println("Execution is here");
 						//if the number of parameters passed to the function 
 						//is equal to the number of parameters in the FunctionStruct
 						//Initialize new scope, parent set to GlobalScope
@@ -255,7 +255,7 @@ public class Evaluator {
 		}catch(EvalException e) {
 			System.out.println(e);
 		}
-		
+		//System.out.println("Is here1");
 		return new NumberNode(0, null);
 	} 
 	
@@ -267,19 +267,22 @@ public class Evaluator {
 	 * Executes the function body using mCurScope as the scope 
 	 * @param context
 	 * @return
-	 */
+	 
 	private ExpressionNode executeFunction(ExecutionContext context) {
 		mCurScope = context.getFunctionScope();
 		System.out.println("CurScope: " + mCurScope.getScope());
 		ExpressionNode functionBody = context.getFunctionBody();
 		return evaluateList(functionBody);
 	}
+	*/
 	
 	private ExpressionNode executeFunctions() {
 		while(!mExecutionStack.isEmpty()) {
+			//System.out.println("Exec stack: " + mExecutionStack);
 			ExecutionContext curcontext = mExecutionStack.pop();
 			mCurScope = curcontext.getFunctionScope();
 			ExpressionNode functionBody = curcontext.getFunctionBody();
+			//System.out.println(functionBody);
 			System.out.println(evaluateList(functionBody));
 			//return evaluateList(functionBody);
 		} 
@@ -287,9 +290,9 @@ public class Evaluator {
 		return null;
 	}
 	
+	
 	/**
 	 * Handles the Stack of functions to be executed
-	 */
 	private void handleExecutionStack() {
 		while (!mExecutionStack.isEmpty()) {
 			ExecutionContext curFunction = mExecutionStack.peek();
@@ -300,12 +303,12 @@ public class Evaluator {
 			//System.out.println("Hello");
 		}
 	}
+	*/
 
 	
 	/**
 	 * Evaluates Math operations
 	 * TODO handles division by 1 number 
-	 * TODO use NumberNodes and SymbolNodes instead of AtomNodes
 	 * @param operation
 	 * @param nodes
 	 * @return
@@ -321,6 +324,8 @@ public class Evaluator {
 						tempStack.push(curNode);
 					} else if (curNode instanceof ListNode) {
 						tempStack.push(evaluateList(curNode));
+					} else if (curNode instanceof SymbolNode) {
+						tempStack.push((ExpressionNode) evaluateSymbol(curNode));
 					}
 				} 
 				argStack = reverseStack(tempStack); 
@@ -344,6 +349,7 @@ public class Evaluator {
 		} catch (Exception e) {
 			System.out.println(e);
 		}
+		//System.out.println("Is here2");
 		return new NumberNode(0, null);		
 	}
 	
