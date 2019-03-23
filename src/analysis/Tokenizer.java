@@ -13,7 +13,18 @@ public class Tokenizer {
 	private Token mCurToken;
 	private String mInputString;
 	
+	public Tokenizer() {
+		mCurPosition = 0;
+		mCurToken = null;
+	}
+	
 	public Tokenizer(String inputString) {
+		mInputString = inputString;
+		mCurPosition = 0;
+		mCurToken = null;
+	}
+	
+	public void setInput(String inputString) {
 		mInputString = inputString;
 		mCurPosition = 0;
 		mCurToken = null;
@@ -26,7 +37,6 @@ public class Tokenizer {
 			return new Token(Type.EOF, "eof"); 
 		} else if (mCurPosition < mInputString.length()) {
 			 character = nextAfterWhitespace(mInputString);
-			 
 			 switch(character) {    
 				case '(':
 					mCurPosition+=1;
@@ -176,7 +186,6 @@ public class Tokenizer {
 		Token token = this.getNextToken();
 		while (token.getType() != Type.EOF) {
 			allTokens.add(token);
-			//System.out.println(token);
 			token = this.getNextToken();
 			
 		}

@@ -5,25 +5,31 @@ import java.util.HashMap;
 
 public class Scope {
 	
-	private HashMap<SymbolNode, Object> mScopeVariables;
+	private HashMap<String, Object> mScopeVariables = new HashMap<>();
 	private String mScopeName;
-	private Scope mParentScope;
+	private Scope mParentScope = null;
 	
 	public Scope(String name) {
 		mScopeName = name;
-		mScopeVariables = new HashMap<>();
-		mParentScope = null;
 	}
 	
-	public void addVariable(SymbolNode var, ExpressionNode value) {
+	public void addVariable(String var, Object value) {
 		mScopeVariables.put(var, value);
+		System.out.println("Scope variables: " + mScopeVariables);
+		//System.out.println(mScopeVariables.containsKey(var));
 	}
 	
-	public Object lookupVar(SymbolNode variable) {
+	public Object lookup(SymbolNode variable) {
 		Object value = null;
+		//System.out.println(variable);
 		try {
-			if (mScopeVariables.containsKey(variable)) {
-				value = mScopeVariables.get(variable);
+			//System.out.println(mScopeVariables);
+			//System.out.println("inside: "+ mScopeVariables.containsKey(variable.getValue()));
+			if (mScopeVariables.containsKey(variable.getValue())) {
+				value = mScopeVariables.get(variable.getValue());
+			} else if (mParentScope != null){
+				mParentScope.lookup(variable);
+				
 			} else {
 				throw new EvalException(variable + " is undefined");
 			}
@@ -37,7 +43,7 @@ public class Scope {
 		return mScopeName;
 	}
 	
-	public HashMap<SymbolNode, Object> getVariables() {
+	public HashMap<String, Object> getVariables() {
 		return mScopeVariables;
 	}
 	

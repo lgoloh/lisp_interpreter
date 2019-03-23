@@ -15,9 +15,26 @@ public class Evaluator {
 			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", 
 			"and", "or", "<", ">", "<=", ">=", "=", "/=", "defun"};
 	//The Global Scope 
-	private static final Scope mGlobalScope = new Scope("Global");
+	private Scope mGlobalScope = new Scope("Global");
+	private ExecutionContext mGlobalExecutionContext = new ExecutionContext(); 
+	
+	//Scope everything is currently operating in.
+	private Scope mCurScope = mGlobalScope;
+	
+	private Stack<ExecutionContext> mExecutionStack = new Stack<ExecutionContext>();
+	
+	public Evaluator() {
+		//mGlobalExecutionContext = new ExecutionContext(mGlobalScope, mSyntaxTree);
+		//mExecutionStack.push(mGlobalExecutionContext);
+	}
 	
 	public Evaluator(ExpressionNode tree) {
+		mSyntaxTree = tree;
+		//mGlobalExecutionContext = new ExecutionContext(mGlobalScope, mSyntaxTree);
+		//mExecutionStack.push(mGlobalExecutionContext);
+	}
+	
+	public void setTree(ExpressionNode tree) {
 		mSyntaxTree = tree;
 	}
 	
@@ -39,7 +56,6 @@ public class Evaluator {
 	 */
 	public Object evaluateSymbol(ExpressionNode head) {
 		String operator = (String) head.getValue();
-		try {
 			if (isValidOperator(operator)) {
 				if (operator.equals("<") || operator.equals(">") 
 						|| operator.equals(">=") || operator.equals("<=")) {
@@ -87,16 +103,13 @@ public class Evaluator {
 				}
 			//checking for user-defined functions in the global scope 
 			//returns the FunctionStruct of the function	
-			} else if (mGlobalScope.getVariables().containsKey(head)){
-				return mGlobalScope.getVariables().get(head);
 			} else {
-				throw new EvalException(head.getValue() + " " + "is not a Valid Symbol");
+				System.out.println(head);
+				//System.out.println("The Global Scope " + mGlobalScope);
+				//System.out.println("This is head " + mGlobalScope.getVariables());
+				return mCurScope.lookup((SymbolNode) head);
 			}
-			
-		} catch(EvalException e) {
-			System.out.println(e);
-			}
-
+		System.out.println(mGlobalScope.getVariables());
 		return null;
 	}
 	
@@ -111,6 +124,8 @@ public class Evaluator {
 		try {
 			if (nodes.size() >= 1) {
 				ExpressionNode head = nodes.get(0);
+				System.out.println(head);
+				System.out.println(mGlobalScope.getVariables());
 				if (head instanceof SymbolNode) {
 					//Returns an operation object after the Symbol is evaluated
 					Object operation = evaluateSymbol((SymbolNode) head);
@@ -192,7 +207,7 @@ public class Evaluator {
 					
 					else if (operation instanceof SymbolNode 
 							&& ((SymbolNode) operation).getValue().equals("defun")) {
-						SymbolNode funcname = (SymbolNode) nodes.get(1);
+						String funcname = (String) ((SymbolNode) nodes.get(1)).getValue();
 						ArrayList<ExpressionNode> paramlist = nodes.get(2).getnodeList();
 						int paramcount = paramlist.size();
 						ExpressionNode body = nodes.get(3);
@@ -200,27 +215,36 @@ public class Evaluator {
 						for (ExpressionNode variable : paramlist) {
 							function.addParam((SymbolNode) variable);
 						}
-						mGlobalScope.getVariables().put(funcname, function);
-						return funcname;
+						//System.out.println(funcname);
+						//System.out.println(function);
+						mGlobalScope.addVariable(funcname, function);
+						//System.out.println("Check updated global scope " + mGlobalScope.getVariables());
+						return nodes.get(1);
+						
 					}
 					//handles user defined functions
 					else if (operation instanceof FunctionStruct) {
 						int paramcount = nodes.size() - 1;
+						System.out.println("Execution is here");
 						//if the number of parameters passed to the function 
 						//is equal to the number of parameters in the FunctionStruct
 						//Initialize new scope, parent set to GlobalScope
 						if (paramcount == ((FunctionStruct) operation).getParamCount()) {
-							Scope functionscope = new Scope(head.toString());
+							Scope functionscope = new Scope((String) head.getValue());
 							functionscope.setParentScope(mGlobalScope);
 							ArrayList<SymbolNode> paramlist = ((FunctionStruct) operation).getParamList();
 							int i = 1;
 							for (SymbolNode variable : paramlist) {
-								functionscope.getVariables().put(variable, nodes.get(i));
+								//function scope will be the contain the variable name 
+								//and the result of evaluating the value of the arguments
+								functionscope.addVariable((String) variable.getValue(), evaluateExpr(nodes.get(i)));
 								i++;
 							}
-							//The execution context which takes the function's Scope and FunctionStruct
-							ExecutionContext env = new ExecutionContext(functionscope, (FunctionStruct) operation);
-							
+							//The execution context which takes the function's Scope and Function body
+							ExecutionContext env = new ExecutionContext(functionscope, ((FunctionStruct) operation).getFunctionBody());
+							//put execution context on stack
+							mExecutionStack.push(env);
+							executeFunctions();
 						}
 					}
 				} 
@@ -231,8 +255,51 @@ public class Evaluator {
 		}catch(EvalException e) {
 			System.out.println(e);
 		}
+		
 		return new NumberNode(0, null);
 	} 
+	
+	
+	
+	/**
+	 * Executes a specific function
+	 * Sets the mCurScope to the scope of the function
+	 * Executes the function body using mCurScope as the scope 
+	 * @param context
+	 * @return
+	 */
+	private ExpressionNode executeFunction(ExecutionContext context) {
+		mCurScope = context.getFunctionScope();
+		System.out.println("CurScope: " + mCurScope.getScope());
+		ExpressionNode functionBody = context.getFunctionBody();
+		return evaluateList(functionBody);
+	}
+	
+	private ExpressionNode executeFunctions() {
+		while(!mExecutionStack.isEmpty()) {
+			ExecutionContext curcontext = mExecutionStack.pop();
+			mCurScope = curcontext.getFunctionScope();
+			ExpressionNode functionBody = curcontext.getFunctionBody();
+			System.out.println(evaluateList(functionBody));
+			//return evaluateList(functionBody);
+		} 
+		mCurScope = mGlobalScope;
+		return null;
+	}
+	
+	/**
+	 * Handles the Stack of functions to be executed
+	 */
+	private void handleExecutionStack() {
+		while (!mExecutionStack.isEmpty()) {
+			ExecutionContext curFunction = mExecutionStack.peek();
+			System.out.println("CurScope: " + curFunction.getFunctionScope().getScope());
+			ExpressionNode result = executeFunction(curFunction);
+			//mExecutionStack.pop();
+			//mCurScope = mExecutionStack.peek().getFunctionScope();
+			//System.out.println("Hello");
+		}
+	}
 
 	
 	/**
@@ -294,6 +361,7 @@ public class Evaluator {
 			ListNode data = getDataList(list);
 			if (data != null) {
 				car.setList(data);
+				System.out.println("Test car");
 				return car.eval();
 			} else {
 				throw new EvalException(list + " " + "must be a list");
@@ -373,12 +441,19 @@ public class Evaluator {
 			data = evaluateList(list);
 		} else if (list instanceof ListNode && ((ListNode) list).isEmpty()) {
 			data = list;
-		} else if (list instanceof SymbolNode && list.getValue().equals("nil")) {
-			Token token = new Token(Type.SOE, "(");
-			ListNode emptyList = new ListNode(token, new ArrayList<>());
-			data = emptyList;
+		} else if (list instanceof SymbolNode) {
+			ExpressionNode result = (ExpressionNode) evaluateSymbol(list);
+			if (result.getValue().equals("nil")) {
+				Token token = new Token(Type.SOE, "(");
+				ListNode emptyList = new ListNode(token, new ArrayList<>());
+				data = emptyList;
+			} else if (result instanceof ListNode) {
+				System.out.println("This result: " + result);
+				data = result;
+			}
 		}
 		if (data instanceof ListNode) {
+			System.out.println("This data: " + data);
 			return (ListNode) data;
 		}
 		return null;

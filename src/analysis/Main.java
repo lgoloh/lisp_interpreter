@@ -13,16 +13,20 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException
 	{	
+		Tokenizer tokenizer = new Tokenizer();
+		Parser parser = new Parser();
+		Evaluator evaluator = new Evaluator();
+		//Scanner scanner = new Scanner(System.in);
 		while (true) {
 			Scanner scanner = new Scanner(System.in);
 			System.out.print("CL-Lisp > ");
 			mInput = read(scanner);
 			if (matchParentheses(mInput)) {
-				Tokenizer tokenizer = new Tokenizer(mInput);
+				tokenizer.setInput(mInput);
 				ArrayList<Token> tokenizedInput = tokenizer.allTokens();
-				Parser parser = new Parser(tokenizedInput);
+				parser.setTokenList(tokenizedInput);
 				ExpressionNode syntaxTree = parser.generateSyntaxTree();
-				Evaluator evaluator = new Evaluator(syntaxTree);
+				evaluator.setTree(syntaxTree);
 				/**
 				try {
 					

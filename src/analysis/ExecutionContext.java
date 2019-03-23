@@ -1,15 +1,23 @@
 package analysis;
 
-import java.util.Stack;
-
 public class ExecutionContext {
 	
 	private Scope mFunctionScope;
-	private FunctionStruct mFunctionDetails;
+	private ExpressionNode mFunctionBody;
 	
-	public ExecutionContext(Scope scope, FunctionStruct function) {
+	public ExecutionContext() {}
+	
+	public ExecutionContext(Scope scope, ExpressionNode function) {
 		mFunctionScope = scope;
-		mFunctionDetails = function;
+		mFunctionBody = function;
+	}
+	
+	public Scope getFunctionScope() {
+		return mFunctionScope;
+	}
+	
+	public ExpressionNode getFunctionBody() {
+		return mFunctionBody;
 	}
 
 }

@@ -9,10 +9,19 @@ public class Parser {
 	
 	private ArrayList<Token> mTokens;
 	private ExpressionNode mSyntaxTree2 = null;
-	private int mCurPosition = 0;
+	private int mCurPosition;
+	
+	public Parser() {}
 	
 	public Parser(ArrayList<Token> tokens) {
 		mTokens = tokens;
+		mCurPosition = 0;
+	}
+	
+	public void setTokenList(ArrayList<Token> tokens) {
+		mTokens = tokens;
+		mCurPosition = 0;
+		mSyntaxTree2 = null;
 	}
 	
 	/**
