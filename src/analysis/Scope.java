@@ -36,6 +36,7 @@ public class Scope {
 		} catch(EvalException e) {
 			System.out.println(e);
 		}
+		
 		return value;
 	}
 	

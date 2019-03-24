@@ -120,7 +120,6 @@ public class Parser {
 	}
 	
 
-	
 	public ExpressionNode expandQuote() {
 		mCurPosition++;
 		//System.out.println(mTokens);
@@ -137,6 +136,7 @@ public class Parser {
 		//System.out.println(new ListNode(listtkn, argList));
 		return new ListNode(listtkn, argList);
 	}
+	
 	
 	
 	private ExpressionNode getcurExpression(Token token) {
