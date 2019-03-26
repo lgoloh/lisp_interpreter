@@ -1,6 +1,6 @@
 package analysis;
 
-import java.util.ArrayList;
+
 import java.util.HashMap;
 
 public class Scope {
@@ -28,7 +28,8 @@ public class Scope {
 			if (mScopeVariables.containsKey(variable.getValue())) {
 				value = mScopeVariables.get(variable.getValue());
 			} else if (mParentScope != null){
-				mParentScope.lookup(variable);
+				//System.out.println("inside scope lookup");
+				value = mParentScope.lookup(variable);
 				
 			} else {
 				throw new EvalException(variable + " is undefined");
@@ -36,7 +37,7 @@ public class Scope {
 		} catch(EvalException e) {
 			System.out.println(e);
 		}
-		
+		//System.out.println("inside scope lookup: " + value);
 		return value;
 	}
 	

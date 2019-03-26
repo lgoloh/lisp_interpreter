@@ -12,5 +12,12 @@ public class NumberNode extends ExpressionNode {
 	public String toString() {
 		return String.valueOf((int) mObject);
 	}
-
+	
+	@Override
+	public boolean isEqual(ExpressionNode nodeb) {
+		if (this.getValue() == nodeb.getValue()) {
+			return true;
+		}
+		return false;
+	}
 }

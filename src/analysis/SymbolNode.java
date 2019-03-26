@@ -13,4 +13,11 @@ public class SymbolNode extends ExpressionNode {
 		return ((String) mObject).toUpperCase();
 	}
 	
+	@Override
+	public boolean isEqual(ExpressionNode nodeb) {
+		if (this.getValue().equals(nodeb.getValue())) {
+			return true;
+		}
+		return false;
+	}
 }

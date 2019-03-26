@@ -41,4 +41,8 @@ public class ExpressionNode {
 		return null;
 	}
 	
+	public boolean isEqual(ExpressionNode node2) {
+		return true;
+	}
+	
 }

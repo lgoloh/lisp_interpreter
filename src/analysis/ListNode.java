@@ -29,4 +29,17 @@ public class ListNode extends ExpressionNode {
 		}
 		return false;
 	}
+	
+	@Override
+	public boolean isEqual(ExpressionNode nodeb) {
+		if (this.getnodeList().size() == nodeb.getnodeList().size()) {
+			for (int i = 0; i < this.getnodeList().size(); i++) {
+				if (!(this.getnodeList().get(i).isEqual(nodeb.getnodeList().get(i)))) {
+					return false;
+				}
+			} return true;
+		}
+		return false;
+	}
+	
 }

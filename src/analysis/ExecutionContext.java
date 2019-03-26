@@ -4,6 +4,7 @@ public class ExecutionContext {
 	
 	private Scope mFunctionScope;
 	private ExpressionNode mFunctionBody;
+	private ExpressionNode mReturnValue;
 	
 	public ExecutionContext() {}
 	
@@ -19,5 +20,14 @@ public class ExecutionContext {
 	public ExpressionNode getFunctionBody() {
 		return mFunctionBody;
 	}
+	
+	public void setReturnValue(ExpressionNode res) {
+		mReturnValue = res;
+	}
+	
+	public ExpressionNode getReurnValue() {
+		return mReturnValue;
+	}
+	
 
 }
