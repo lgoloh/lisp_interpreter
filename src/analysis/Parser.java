@@ -102,7 +102,7 @@ public class Parser {
 				if (symbol.equals("'")) {
 					expr = expandQuote();
 				} else {
-					expr = new SymbolNode(symbol, new ArrayList<>());
+					expr = new SymbolNode(symbol.toUpperCase(), new ArrayList<>());
 				}
 				//SymbolNode sym = new SymbolNode(symbol, new ArrayList<>());
 				nodes.add(expr);
@@ -124,7 +124,7 @@ public class Parser {
 		mCurPosition++;
 		//System.out.println(mTokens);
 		Token listtkn = new Token(Type.SOE, "(");
-		SymbolNode quoteSymbol = new SymbolNode("quote", null);
+		SymbolNode quoteSymbol = new SymbolNode("QUOTE", null);
 		ArrayList<ExpressionNode> argList = new ArrayList<>();
 		argList.add(0, quoteSymbol);
 		if (mTokens.get(mCurPosition).getValue().equals("'"))
@@ -145,7 +145,7 @@ public class Parser {
 			return new NumberNode(number, new ArrayList<>());
 		} else if (token.getType() == Type.SYMBOL) {
 			String symbol = token.getValue();
-			return new SymbolNode(symbol, new ArrayList<>());
+			return new SymbolNode(symbol.toUpperCase(), new ArrayList<>());
 		} else if (token.getType() == Type.SOE) {
 			return new ListNode(token, nodeList(mTokens));
 		}

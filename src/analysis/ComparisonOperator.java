@@ -24,24 +24,24 @@ public class ComparisonOperator extends BinOperator {
 				switch (mOperator) {
 				case "<":
 					if (first < second) {
-						return new SymbolNode("t", null);
+						return new SymbolNode("T", null);
 					} 
-					return new SymbolNode("nil", null);
+					return new SymbolNode("NIL", null);
 				case ">":
 					if (first > second) {
-						return new SymbolNode("t", null);
+						return new SymbolNode("T", null);
 					}
-					return new SymbolNode("nil", null);
+					return new SymbolNode("NIL", null);
 				case "<=":
 					if (first <= second) {
-						return new SymbolNode("t", null);
+						return new SymbolNode("T", null);
 					}
-					return new SymbolNode("nil", null);
+					return new SymbolNode("NIL", null);
 				case ">=":
 					if (first >= second) {
-						return new SymbolNode("t", null);
+						return new SymbolNode("T", null);
 					}
-					return new SymbolNode("nil", null);
+					return new SymbolNode("NIL", null);
 					}
 			} else if (!(mParam1 instanceof NumberNode)){
 				throw new EvalException(mParam1 + " " + "is not a number");

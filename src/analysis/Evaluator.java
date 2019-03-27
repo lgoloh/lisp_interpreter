@@ -11,9 +11,9 @@ import util.Type;
 public class Evaluator {
 	
 	private ExpressionNode mSyntaxTree;
-	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "quote", 
-			"list", "cons", "car", "cdr", "listp", "nil", "t", "null", "if", 
-			"and", "or", "<", ">", "<=", ">=", "=", "/=", "defun", "let", "setq", "equal"};
+	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "QUOTE", 
+			"LIST", "CONS", "CAR", "CDR", "LISTP", "NIL", "T", "NULL", "IF", 
+			"AND", "OR", "<", ">", "<=", ">=", "=", "/=", "DEFUN", "LET", "SETQ", "EQUAL"};
 	//The Global Scope 
 	private Scope mGlobalScope = new Scope("Global");
 	private ExecutionContext mGlobalExecutionContext = new ExecutionContext(); 
@@ -56,6 +56,7 @@ public class Evaluator {
 	 */
 	public Object evaluateSymbol(ExpressionNode head) {
 		String operator = (String) head.getValue();
+		try {
 			if (isValidOperator(operator)) {
 				if (operator.equals("<") || operator.equals(">") 
 						|| operator.equals(">=") || operator.equals("<=")) {
@@ -71,45 +72,58 @@ public class Evaluator {
 					case "/":
 						return new Divide();
 					//returns the Quote operation object if ' or quote is used	
-					case "list":
+					case "LIST":
 						return new ListOperator();
-					case "quote":
+					case "QUOTE":
 						//returns the actual Quote function that has the execution function
 						Quote quote = new Quote();
 						return quote;
-					case "cons":
+					case "CONS":
 						Cons cons = new Cons();
 						return cons;
-					case "nil":
+					case "NIL":
 						return head;
-					case "car":
+					case "CAR":
 						return new Car();
-					case "cdr":
+					case "CDR":
 						return new Cdr();
-					case "t":
+					case "T":
 						return head;
-					case "listp":
+					case "LISTP":
 						return new ListP();
-					case "null":
+					case "NULL":
 						return head;
-					case "if":
+					case "IF":
 						return head;
-					case "and":
+					case "AND":
 						return head;
-					case "or":
+					case "OR":
 						return head;
-					case "defun":
+					case "DEFUN":
 						return head;
 					case "=":
 						return head;
-					case "equal"	:
+					case "EQUAL"	:
+						return head;
+					case "SETQ":
+						return head;
+					case "LET":
 						return head;
 				}
 			//checking for user-defined functions in the global scope 
 			//returns the FunctionStruct of the function	
 			} else {
-				return mCurScope.lookup((SymbolNode) head);
+				Object value = mCurScope.lookup((SymbolNode) head);
+				if (value == null) {
+					throw new EvalException(head + " is undefined");
+				} else {
+					return value;
+				}
+				//return mCurScope.lookup((SymbolNode) head);
 			}
+		} catch(EvalException e) {
+			System.out.println(e);
+		}
 		//System.out.println(mGlobalScope.getVariables());
 		return null;
 	}
@@ -125,7 +139,7 @@ public class Evaluator {
 		try {
 			if (nodes.size() >= 1) {
 				ExpressionNode head = nodes.get(0);
-				//System.out.println(head);
+				System.out.println(head);
 				//System.out.println(mGlobalScope.getVariables());
 				if (head instanceof SymbolNode) {
 					//Returns an operation object after the Symbol is evaluated
@@ -168,16 +182,18 @@ public class Evaluator {
 					}
 					
 					else if (operation instanceof SymbolNode 
-							&& ((SymbolNode) operation).getValue().equals("null")) {
+							&& ((SymbolNode) operation).getValue().equals("NULL")) {
+						System.out.println("Eval null");
 						if (nodes.size() > 2) {
 							throw new EvalException("too many arguments given to NULL " + listnode);
 						} else {
+							System.out.println("Eval null 2");
 							return evaluateNull(nodes.get(1));
 						}
 					}
 					
 					else if (operation instanceof SymbolNode
-							&& ((SymbolNode) operation).getValue().equals("if")) {
+							&& ((SymbolNode) operation).getValue().equals("IF")) {
 						if (nodes.size() == 3 || nodes.size() == 4) {
 							ArrayList<ExpressionNode> argList = new ArrayList<>();
 							for (int i = 1; i < nodes.size(); i++) {
@@ -192,7 +208,7 @@ public class Evaluator {
 					}
 					
 					else if (operation instanceof SymbolNode
-							&& ((SymbolNode) operation).getValue().equals("and")) {
+							&& ((SymbolNode) operation).getValue().equals("AND")) {
 						nodes.remove(0);
 						ArrayList<ExpressionNode> argList = new ArrayList<>();
 						argList.addAll(nodes);
@@ -200,7 +216,7 @@ public class Evaluator {
 					}
 					
 					else if (operation instanceof SymbolNode
-							&& ((SymbolNode) operation).getValue().equals("or")) {
+							&& ((SymbolNode) operation).getValue().equals("OR")) {
 						nodes.remove(0);
 						ArrayList<ExpressionNode> argList = new ArrayList<>();
 						argList.addAll(nodes);
@@ -208,7 +224,7 @@ public class Evaluator {
 					}
 					
 					else if (operation instanceof SymbolNode 
-							&& ((SymbolNode) operation).getValue().equals("defun")) {
+							&& ((SymbolNode) operation).getValue().equals("DEFUN")) {
 						String funcname = (String) ((SymbolNode) nodes.get(1)).getValue();
 						ArrayList<ExpressionNode> paramlist = nodes.get(2).getnodeList();
 						int paramcount = paramlist.size();
@@ -253,13 +269,40 @@ public class Evaluator {
 					}
 					
 					else if (operation instanceof SymbolNode 
-							&& (((SymbolNode) operation).getValue().equals("=") || ((SymbolNode) operation).getValue().equals("equal"))) {
+							&& (((SymbolNode) operation).getValue().equals("=") || ((SymbolNode) operation).getValue().equals("EQUAL"))) {
 						return evaluateEquality(nodes.get(1), nodes.get(2));
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("SETQ")) {
+						ExpressionNode nvalue = new ExpressionNode();
+						if (nodes.size()%2 == 1) {
+							int j = 2;
+							for (int i = 1; i<nodes.size()-1; i+=2) {
+								if (nodes.get(i) instanceof SymbolNode) {
+									String varname = (String) ((SymbolNode) nodes.get(i)).getValue();
+									SymbolNode variable = (SymbolNode) nodes.get(i);
+									ExpressionNode value = (ExpressionNode) mCurScope.lookup(variable);
+									nvalue = evaluateExpr(nodes.get(j));
+									if (value == null) {
+										mCurScope.addVariable(varname, nvalue);
+									} else {
+										Scope scope = mCurScope.getOtherScope();
+										scope.getVariables().replace(varname, nvalue);
+									}
+								}
+								j+=2;
+							}
+
+						} else if (nodes.size()%2 == 0){
+							throw new EvalException("setq has odd arguments");
+						} 
+						return nvalue;
 					}
 				} 
 				//the empty list
 			} else {
-				return new SymbolNode("nil", null);
+				return new SymbolNode("NIL", null);
 			}
 		}catch(EvalException e) {
 			System.out.println(e);
@@ -297,21 +340,6 @@ public class Evaluator {
 		System.out.println("Exec stack: " + mExecutionStack);
 		return result;
 	}
-	
-	
-	/**
-	 * Handles the Stack of functions to be executed
-	private void handleExecutionStack() {
-		while (!mExecutionStack.isEmpty()) {
-			ExecutionContext curFunction = mExecutionStack.peek();
-			System.out.println("CurScope: " + curFunction.getFunctionScope().getScope());
-			ExpressionNode result = executeFunction(curFunction);
-			//mExecutionStack.pop();
-			//mCurScope = mExecutionStack.peek().getFunctionScope();
-			//System.out.println("Hello");
-		}
-	}
-	*/
 
 	
 	/**
@@ -470,7 +498,7 @@ public class Evaluator {
 			data = list;
 		} else if (list instanceof SymbolNode) {
 			ExpressionNode result = (ExpressionNode) evaluateSymbol(list);
-			if (result.getValue().equals("nil")) {
+			if (result.getValue().equals("NIL")) {
 				Token token = new Token(Type.SOE, "(");
 				ListNode emptyList = new ListNode(token, new ArrayList<>());
 				data = emptyList;
@@ -496,7 +524,7 @@ public class Evaluator {
 		Token token = new Token(Type.SOE, "(");
 		ListNode resultList = new ListNode(token, new ArrayList<ExpressionNode>());
 			if (nodes.size() == 1) {
-				return new SymbolNode("nil", null);
+				return new SymbolNode("NIL", null);
 			} else if (nodes.size() > 1) {
 				for (int i = 1; i < nodes.size(); i++) {
 					ExpressionNode curNode = nodes.get(i);
@@ -538,10 +566,11 @@ public class Evaluator {
 	private ExpressionNode evaluateNull(ExpressionNode arg) {
 		if (arg instanceof SymbolNode) {
 			ExpressionNode res = (ExpressionNode) evaluateSymbol(arg);
-			if (res.getValue().equals("nil"))
+			System.out.println("Result of null: " + res);
+			if (res.getValue().equals("NIL") || res.getnodeList().isEmpty())
 				return new SymbolNode("T", null);
 			else
-				return new SymbolNode("nil", null); 
+				return new SymbolNode("NIL", null); 
 		}if (arg instanceof ListNode && ((ListNode) arg).isEmpty()) {
 			return new SymbolNode("T", null);
 		} else if (arg instanceof ListNode) {
@@ -550,7 +579,7 @@ public class Evaluator {
 				return new SymbolNode("T", null);
 			}
 		}
-		return new SymbolNode("nil", null);
+		return new SymbolNode("NIL", null);
 	}
 	
 	/**
@@ -564,10 +593,10 @@ public class Evaluator {
 		result = evaluateExpr(nodeList.get(0));
 		System.out.println("If result: "+ result);
 		if (result instanceof SymbolNode
-				&& ((SymbolNode) result).getValue().equals("nil") && nodeList.size() == 3) {
+				&& ((SymbolNode) result).getValue().equals("NIL") && nodeList.size() == 3) {
 			return evaluateExpr(nodeList.get(2));
 		} else if (result instanceof SymbolNode
-				&& ((SymbolNode) result).getValue().equals("nil") && nodeList.size() == 2) {
+				&& ((SymbolNode) result).getValue().equals("NIL") && nodeList.size() == 2) {
 			return result;
 		} else {
 			return evaluateExpr(nodeList.get(1));
@@ -584,13 +613,13 @@ public class Evaluator {
 			ExpressionNode result = evaluateExpr(nodeList.get(0));
 			int i = 1;
 			while (!(result instanceof SymbolNode
-					&& ((SymbolNode) result).getValue().equals("nil")) && i < nodeList.size()) {
+					&& ((SymbolNode) result).getValue().equals("NIL")) && i < nodeList.size()) {
 				result = evaluateExpr(nodeList.get(i));
 				i++;
 			}
 			return result;
 		} else if (nodeList.size() == 0) {
-			return new SymbolNode("t", null);
+			return new SymbolNode("T", null);
 		}
 		return null;
 	}
@@ -602,14 +631,14 @@ public class Evaluator {
 			for (int i = 0; i < nodeList.size();) {
 				result = evaluateExpr(nodeList.get(i));
 				if (!(result instanceof SymbolNode
-					&& ((SymbolNode) result).getValue().equals("nil"))) {
+					&& ((SymbolNode) result).getValue().equals("NIL"))) {
 					return result;
 				} else {
 					i++;
 				}
 			}
 		} else if (nodeList.size() == 0) {
-			return new SymbolNode("nil", null);
+			return new SymbolNode("NIL", null);
 		}
 		return null;
 	}
@@ -627,9 +656,9 @@ public class Evaluator {
 		ExpressionNode result2 = evaluateExpr(param2);
 		boolean result = result1.isEqual(result2);
 		if (result == true) {
-			return new SymbolNode("t", null);
+			return new SymbolNode("T", null);
 		} else {
-			return new SymbolNode("nil", null);
+			return new SymbolNode("NIL", null);
 		}
 		
 	}
@@ -654,6 +683,7 @@ public class Evaluator {
 		System.out.println("expression result: " + result);
 		return result;	
 	}
+	
 	
 
 	public static <T> Stack<T> reverseStack(Stack<T> stack) {

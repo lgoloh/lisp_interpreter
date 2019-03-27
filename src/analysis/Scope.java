@@ -8,6 +8,8 @@ public class Scope {
 	private HashMap<String, Object> mScopeVariables = new HashMap<>();
 	private String mScopeName;
 	private Scope mParentScope = null;
+	//use for setq
+	private Scope mScope = null;
 	
 	public Scope(String name) {
 		mScopeName = name;
@@ -22,20 +24,15 @@ public class Scope {
 	public Object lookup(SymbolNode variable) {
 		Object value = null;
 		//System.out.println(variable);
-		try {
-			//System.out.println(mScopeVariables);
-			//System.out.println("inside: "+ mScopeVariables.containsKey(variable.getValue()));
-			if (mScopeVariables.containsKey(variable.getValue())) {
-				value = mScopeVariables.get(variable.getValue());
-			} else if (mParentScope != null){
-				//System.out.println("inside scope lookup");
-				value = mParentScope.lookup(variable);
-				
-			} else {
-				throw new EvalException(variable + " is undefined");
-			}
-		} catch(EvalException e) {
-			System.out.println(e);
+		//System.out.println(mScopeVariables);
+		//System.out.println("inside: "+ mScopeVariables.containsKey(variable.getValue()));
+		if (mScopeVariables.containsKey(variable.getValue())) {
+			value = mScopeVariables.get(variable.getValue());
+			mScope = this;
+		} else if (mParentScope != null){
+			//System.out.println("inside scope lookup");
+			value = mParentScope.lookup(variable);
+			mScope = mParentScope;
 		}
 		//System.out.println("inside scope lookup: " + value);
 		return value;
@@ -55,6 +52,10 @@ public class Scope {
 	
 	public Scope getParentScope() {
 		return mParentScope;
+	}
+	
+	public Scope getOtherScope() {
+		return mScope;
 	}
 	
 }
