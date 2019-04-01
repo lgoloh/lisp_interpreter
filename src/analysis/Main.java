@@ -10,6 +10,7 @@ import util.Token;
 public class Main {
 	
 	private static String mInput;
+	private static boolean mRunner = true;
 	
 	public static void main(String[] args) throws IOException
 	{	
@@ -17,7 +18,7 @@ public class Main {
 		Parser parser = new Parser();
 		Evaluator evaluator = new Evaluator();
 		//Scanner scanner = new Scanner(System.in);
-		while (true) {
+		while (mRunner) {
 			Scanner scanner = new Scanner(System.in);
 			System.out.print("CL-Lisp > ");
 			mInput = read(scanner);
@@ -49,6 +50,10 @@ public class Main {
 			}
 		return mInput;
 		}
+	
+	public static void endLoop() {
+		mRunner = false;
+	}
 		
 	public static boolean matchParentheses(String input) {
 		Stack parenStack = new Stack();

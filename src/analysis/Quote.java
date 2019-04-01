@@ -23,6 +23,9 @@ public class Quote {
 		} else if (mQuoteNode.getnodeList().get(1) instanceof NumberNode) {
 			return (NumberNode) mQuoteNode.getnodeList().get(1);
 		} else if (mQuoteNode.getnodeList().get(1) instanceof ListNode) {
+			if (mQuoteNode.getnodeList().get(1).getnodeList().isEmpty()) {
+				return new SymbolNode("NIL", null);
+			}
 			return (ListNode) mQuoteNode.getnodeList().get(1);
 		}
 		return null;

@@ -58,4 +58,8 @@ public class Scope {
 		return mScope;
 	}
 	
+	public void setVariableHash(HashMap<String, Object> hash) {
+		mScopeVariables = hash;
+	}
+	
 }

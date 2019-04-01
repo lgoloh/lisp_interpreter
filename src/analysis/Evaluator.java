@@ -1,6 +1,7 @@
 package analysis;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
@@ -13,25 +14,19 @@ public class Evaluator {
 	private ExpressionNode mSyntaxTree;
 	private static String[] mValidOperators = {"+", "-", "*", "/", "'", "QUOTE", 
 			"LIST", "CONS", "CAR", "CDR", "LISTP", "NIL", "T", "NULL", "IF", 
-			"AND", "OR", "<", ">", "<=", ">=", "=", "/=", "DEFUN", "LET", "SETQ", "EQUAL"};
+			"AND", "OR", "<", ">", "<=", ">=", "=", "/=", "DEFUN", "LET", "SETQ", 
+			"EQUAL", "DO", "PROGN", "TERPRI", "PRINC", "QUIT", "NOT", "APPLY", "FUNCTION"};
 	//The Global Scope 
 	private Scope mGlobalScope = new Scope("Global");
-	private ExecutionContext mGlobalExecutionContext = new ExecutionContext(); 
 	
 	//Scope everything is currently operating in.
 	private Scope mCurScope = mGlobalScope;
 	
-	private Stack<ExecutionContext> mExecutionStack = new Stack<ExecutionContext>();
-	
 	public Evaluator() {
-		//mGlobalExecutionContext = new ExecutionContext(mGlobalScope, mSyntaxTree);
-		//mExecutionStack.push(mGlobalExecutionContext);
 	}
 	
 	public Evaluator(ExpressionNode tree) {
 		mSyntaxTree = tree;
-		//mGlobalExecutionContext = new ExecutionContext(mGlobalScope, mSyntaxTree);
-		//mExecutionStack.push(mGlobalExecutionContext);
 	}
 	
 	public void setTree(ExpressionNode tree) {
@@ -109,6 +104,16 @@ public class Evaluator {
 						return head;
 					case "LET":
 						return head;
+					case "DO":
+						return head;
+					case "PROGN":
+						return head;
+					case "PRINC":
+						return head;
+					case "QUIT":	
+						return head;
+					case "NOT":
+						return head;
 				}
 			//checking for user-defined functions in the global scope 
 			//returns the FunctionStruct of the function	
@@ -139,7 +144,7 @@ public class Evaluator {
 		try {
 			if (nodes.size() >= 1) {
 				ExpressionNode head = nodes.get(0);
-				System.out.println(head);
+				//System.out.println(head);
 				//System.out.println(mGlobalScope.getVariables());
 				if (head instanceof SymbolNode) {
 					//Returns an operation object after the Symbol is evaluated
@@ -240,11 +245,6 @@ public class Evaluator {
 					//handles user defined functions
 					else if (operation instanceof FunctionStruct) {
 						int paramcount = nodes.size() - 1;
-						//System.out.println("Body Check: " + ((FunctionStruct) operation).getFunctionBody());
-						//System.out.println("Execution is here");
-						//if the number of parameters passed to the function 
-						//is equal to the number of parameters in the FunctionStruct
-						//Initialize new scope, parent set to GlobalScope
 						if (paramcount == ((FunctionStruct) operation).getParamCount()) {
 							Scope functionscope = new Scope((String) head.getValue());
 							//change from GlobalScope to CurScope
@@ -252,24 +252,23 @@ public class Evaluator {
 							ArrayList<SymbolNode> paramlist = ((FunctionStruct) operation).getParamList();
 							int i = 1;
 							for (SymbolNode variable : paramlist) {
-								//function scope will be the contain the variable name 
-								//and the result of evaluating the value of the arguments
-								//check for variables defined within the function this function is called in if applicable
 								functionscope.addVariable((String) variable.getValue(), evaluateExpr(nodes.get(i)));
 								//System.out.println("Scope variables: " + functionscope.getVariables());
 								i++;
 							}
-							//The execution context which takes the function's Scope and Function body
 							ExecutionContext env = new ExecutionContext(functionscope, ((FunctionStruct) operation).getFunctionBody());
-							//put execution context on stack
-							mExecutionStack.push(env);
-							//System.out.println("Exec stac" + mExecutionStack);
-							return executeFunctions();
+							mCurScope = env.getFunctionScope();
+							//System.out.println("CurScope: " + mCurScope.getScope());
+							ExpressionNode functionBody = env.getFunctionBody();
+							ExpressionNode result = evaluateList(functionBody);
+							mCurScope = mCurScope.getParentScope();
+							return result;
 						}
 					}
 					
 					else if (operation instanceof SymbolNode 
-							&& (((SymbolNode) operation).getValue().equals("=") || ((SymbolNode) operation).getValue().equals("EQUAL"))) {
+							&& (((SymbolNode) operation).getValue().equals("=") 
+									|| ((SymbolNode) operation).getValue().equals("EQUAL"))) {
 						return evaluateEquality(nodes.get(1), nodes.get(2));
 					}
 					
@@ -284,8 +283,10 @@ public class Evaluator {
 									SymbolNode variable = (SymbolNode) nodes.get(i);
 									ExpressionNode value = (ExpressionNode) mCurScope.lookup(variable);
 									nvalue = evaluateExpr(nodes.get(j));
+									//System.out.print("setq value: " + value);
+									//if the value is not found, put it in the global variable
 									if (value == null) {
-										mCurScope.addVariable(varname, nvalue);
+										mGlobalScope.addVariable(varname, nvalue);
 									} else {
 										Scope scope = mCurScope.getOtherScope();
 										scope.getVariables().replace(varname, nvalue);
@@ -299,6 +300,76 @@ public class Evaluator {
 						} 
 						return nvalue;
 					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("LET")) {
+						//Check that the variable initializer list is valid
+						if (nodes.size() >= 2) {
+							ExpressionNode result = new ExpressionNode();
+							Scope tempScope = mCurScope;
+							mCurScope = new Scope("let");
+							mCurScope.setParentScope(tempScope);
+							ListNode variableSpecs = (ListNode)nodes.get(1);
+							//sets the variables
+							letvariableInitializer(variableSpecs);
+							if (nodes.size() > 2) {
+								for (int i = 2; i < nodes.size(); i++) {
+									result = evaluateExpr(nodes.get(i));
+								}
+							} else {
+								return new SymbolNode("NIL", null);
+							}
+							mCurScope = tempScope;
+							return result;
+						} else {
+							throw new EvalException("Too few parameters for special operator LET " + nodes);
+						}
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("DO")) {
+						return evaluateDo(nodes);
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("PROGN")) {
+						ExpressionNode result = new SymbolNode("NIL", null);
+						for (int i = 1; i < nodes.size(); i++) {
+							result = evaluateExpr(nodes.get(i));
+						}
+						return result;
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("PRINC")) {
+						
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("TERPRI")) {
+						
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("QUIT")) {
+						Main.endLoop();
+					}
+					
+					else if (operation instanceof SymbolNode 
+							&& ((SymbolNode) operation).getValue().equals("NOT")) {
+						if (nodes.size() == 2) {
+							ExpressionNode result = evaluateExpr(nodes.get(1));
+							if (!(result.isEqual(new SymbolNode("NIL", null)))) {
+								return new SymbolNode("NIL", null);
+							} else {
+								return new SymbolNode("T", null);
+							}
+						} else if (nodes.size() == 1) {
+							throw new EvalException("too few arguments given to not " + listnode);
+						} else if (nodes.size() > 2) {
+							throw new EvalException("too many arguments given to not " + listnode);
+						}
+					}
 				} 
 				//the empty list
 			} else {
@@ -309,36 +380,6 @@ public class Evaluator {
 		}
 		//System.out.println("Is here1");
 		return new NumberNode(0, null);
-	} 
-	
-	
-	
-	/**
-	 * Executes a specific function
-	 * Sets the mCurScope to the scope of the function
-	 * Executes the function body using mCurScope as the scope 
-	 * @param context
-	 * @return
-	 */
-	private ExpressionNode executeFunction(ExecutionContext context) {
-		mCurScope = context.getFunctionScope();
-		//System.out.println("CurScope: " + mCurScope.getScope());
-		ExpressionNode functionBody = context.getFunctionBody();
-		ExpressionNode result = evaluateList(functionBody);
-		mExecutionStack.pop();
-		return result;
-	}
-	
-	
-	private ExpressionNode executeFunctions() {
-		//System.out.println("Size of execution contec = " + mExecutionStack.size());
-		//System.out.println("Exec stack: " + mExecutionStack);
-		//peek instead of pop
-		ExecutionContext curcontext = mExecutionStack.peek();
-		ExpressionNode result = executeFunction(curcontext);
-		mCurScope = mGlobalScope;
-		System.out.println("Exec stack: " + mExecutionStack);
-		return result;
 	}
 
 	
@@ -401,7 +442,6 @@ public class Evaluator {
 		return arguments.pop();
 	}
 	
-	//private ExpressionNode evaluateComparison(String operator, ExpressionNode first, ExpressionNode second) {
 	
 	
 	/**
@@ -415,7 +455,7 @@ public class Evaluator {
 			ListNode data = getDataList(list);
 			if (data != null) {
 				car.setList(data);
-				System.out.println("Test car");
+				//System.out.println("Test car");
 				return car.eval();
 			} else {
 				throw new EvalException(list + " " + "must be a list");
@@ -435,7 +475,7 @@ public class Evaluator {
 	 */
 	private ExpressionNode evaluateCdr(Cdr cdr, ExpressionNode list) {
 		try {
-			System.out.println("Is in cdr");
+			//System.out.println("Is in cdr");
 			ListNode data = getDataList(list);
 			if (data != null) {
 				cdr.setList(data);
@@ -465,8 +505,7 @@ public class Evaluator {
 			ExpressionNode newValue = new ExpressionNode();
 			if (data != null) {
 				if (input instanceof NumberNode) {
-					newValue.setValue(evaluateNumber(input));
-					newValue.setNodeList();
+					newValue = evaluateNumber(input);
 				} else if (input instanceof ListNode) {
 					newValue = evaluateList(input);
 				} else if (input instanceof SymbolNode) {
@@ -498,17 +537,18 @@ public class Evaluator {
 			data = list;
 		} else if (list instanceof SymbolNode) {
 			ExpressionNode result = (ExpressionNode) evaluateSymbol(list);
+			//System.out.println("getdatalist result: " + result);
 			if (result.getValue().equals("NIL")) {
 				Token token = new Token(Type.SOE, "(");
 				ListNode emptyList = new ListNode(token, new ArrayList<>());
 				data = emptyList;
 			} else if (result instanceof ListNode) {
-				System.out.println("This result: " + result);
+				//System.out.println("This result: " + result);
 				data = result;
 			}
 		}
 		if (data instanceof ListNode) {
-			System.out.println("This data: " + data);
+			//System.out.println("This data: " + data);
 			return (ListNode) data;
 		}
 		return null;
@@ -555,7 +595,7 @@ public class Evaluator {
 		if (data != null) {
 			return new SymbolNode("T", null);
 		}
-		return new SymbolNode("nil", null);
+		return new SymbolNode("NIL", null);
 	}
 	
 	/**
@@ -566,7 +606,7 @@ public class Evaluator {
 	private ExpressionNode evaluateNull(ExpressionNode arg) {
 		if (arg instanceof SymbolNode) {
 			ExpressionNode res = (ExpressionNode) evaluateSymbol(arg);
-			System.out.println("Result of null: " + res);
+			//System.out.println("Result of null: " + res);
 			if (res.getValue().equals("NIL") || res.getnodeList().isEmpty())
 				return new SymbolNode("T", null);
 			else
@@ -589,9 +629,9 @@ public class Evaluator {
 	 */
 	private ExpressionNode evaluateIf(ArrayList<ExpressionNode> nodeList) {
 		ExpressionNode result = new ExpressionNode();
-		System.out.println(nodeList.get(0));
+		//System.out.println(nodeList.get(0));
 		result = evaluateExpr(nodeList.get(0));
-		System.out.println("If result: "+ result);
+		//System.out.println("If result: "+ result);
 		if (result instanceof SymbolNode
 				&& ((SymbolNode) result).getValue().equals("NIL") && nodeList.size() == 3) {
 			return evaluateExpr(nodeList.get(2));
@@ -675,15 +715,50 @@ public class Evaluator {
 		if (node instanceof NumberNode) {
 			result = evaluateNumber(node);
 		} else if (node instanceof ListNode) {
-			System.out.println("expression node: " + node);
+			//System.out.println("expression node: " + node);
 			result = evaluateList(node);
 		} else if (node instanceof SymbolNode) {
 			result = (ExpressionNode) evaluateSymbol(node);
 		}
-		System.out.println("expression result: " + result);
+		//System.out.println("expression result: " + result);
 		return result;	
 	}
 	
+	
+	
+	private void letvariableInitializer(ListNode varlist) {
+		try {
+			HashMap<String, Object> variables = new HashMap<String, Object>();
+			ArrayList<ExpressionNode> variableSpecs = varlist.getnodeList();
+			for (ExpressionNode node : variableSpecs) {
+				if (node instanceof ListNode) {
+					ArrayList<ExpressionNode> vars = node.getnodeList();
+					if (vars.size() == 2 && vars.get(0) instanceof SymbolNode) {
+						ExpressionNode value = evaluateExpr(vars.get(1));
+						String varname = (String)vars.get(0).getValue();
+						variables.put(varname, value);
+					} else if (vars.size() > 2) {
+						throw new EvalException("Illegal variable specification " + node);
+					} else if (vars.size() < 2 && vars.get(0) instanceof SymbolNode) {
+						//System.out.println("Inside variable init " + node);
+						ExpressionNode value = new SymbolNode("NIL", null);
+						String varname = (String)node.getnodeList().get(0).getValue();
+						variables.put(varname, value);
+					}
+				} else if (node instanceof SymbolNode) {
+					ExpressionNode value = new SymbolNode("NIL", null);
+					String varname = (String)node.getValue();
+					variables.put(varname, value);
+				} else if (node instanceof NumberNode) {
+					throw new EvalException("Illegal variable specification " + node);
+				}
+			}
+			mCurScope.setVariableHash(variables);
+			System.out.println("variables inside variable init " + mCurScope.getVariables());
+		} catch(EvalException e) {
+			System.out.println(e);
+		}
+	}
 	
 
 	public static <T> Stack<T> reverseStack(Stack<T> stack) {
@@ -707,6 +782,111 @@ public class Evaluator {
 		}
 		return false;	
 	}
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * All Do functions 
+	 * @param dolist
+	 * @return
+	 */
+	
+	public ExpressionNode evaluateDo(ArrayList<ExpressionNode> dolist) {
+		//setting up scopes
+		Scope tempScope = mCurScope;
+		mCurScope = new Scope("do");
+		mCurScope.setParentScope(tempScope);
+		//Set variables
+		try {
+			ArrayList<ExpressionNode> variableSpecs = dolist.get(1).getnodeList();
+			ArrayList<ExpressionNode> afterIterExpressions = dolist.get(2).getnodeList();
+			//Stores the step-forms of the variable
+			HashMap<String, Object> stepforms = new HashMap<String, Object>();
+			ExpressionNode endtest = afterIterExpressions.get(0);
+			System.out.println("EndTest: " + endtest);
+			ExpressionNode bodyexpressions = null;
+			ExpressionNode result = null;
+			if (dolist.size() > 3) {
+				bodyexpressions = dolist.get(3);
+			}
+			for (ExpressionNode node : variableSpecs) {
+				if (node instanceof ListNode) {
+					initializeVars((ListNode) node);
+				} else {
+					throw new EvalException("Invalid variable initializer " + node);
+				}
+			}
+			while (!(isEndIteration(endtest))) {
+				if (bodyexpressions != null) {
+					//System.out.println("Is it here?");
+					//after evaluation of body (what to do with the result of the eval?)
+					evaluateExpr(bodyexpressions);
+					//update result is added to the list of updates
+					stepforms = incrementVar(variableSpecs);
+					mCurScope.setVariableHash(stepforms);
+				} else {
+					stepforms = incrementVar(variableSpecs);
+					mCurScope.setVariableHash(stepforms);
+				}
+			}
+			for (ExpressionNode node : afterIterExpressions) {
+				System.out.println("Is it here?");
+				result = evaluateExpr(node);
+				
+			}
+			mCurScope = tempScope;
+			return result;
+		} catch(EvalException e) {
+			System.out.println(e);
+		}
+		return null;
+	}
+	
+	/**
+	 * Takes a single variable specification and initializes the value  
+	 * @param variableSpec
+	 */
+	private void initializeVars(ListNode variableSpec) {
+		try {
+			ArrayList<ExpressionNode> spec = variableSpec.getnodeList();
+			if (spec.get(0) instanceof SymbolNode) {
+				String varname = (String) spec.get(0).getValue();
+				ExpressionNode value = evaluateExpr(spec.get(1));
+				mCurScope.addVariable(varname, value);
+			} else {
+				throw new EvalException("Invalid variable initializer " + variableSpec);
+			}
+		} catch(EvalException e) {
+			System.out.println(e);
+		}	 
+	}
+	
+	/**
+	 * Evaluates the step-form of a variable
+	 * @param varname
+	 * @param updateexpr
+	 */
+	private HashMap<String, Object> incrementVar(ArrayList<ExpressionNode> varspecs) {
+		HashMap<String, Object> stepforms = new HashMap<String, Object>();
+		for (ExpressionNode node : varspecs) {
+			String varname = (String) node.getnodeList().get(0).getValue();
+			stepforms.put(varname, evaluateExpr(node.getnodeList().get(2)));
+		}
+		return stepforms;
+	}
+	
+	/**
+	 * Tests the end iteration expression
+	 * @param endtest
+	 * @return
+	 */
+	private boolean isEndIteration(ExpressionNode endtest) {
+		ExpressionNode result = evaluateExpr(endtest);
+		if (result.isEqual(new SymbolNode("T", null))) {
+			return true;
+		}
+		return false;
+	}
+	
 	
 	
 	/**
