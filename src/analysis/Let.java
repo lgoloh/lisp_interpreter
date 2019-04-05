@@ -18,13 +18,10 @@ public class Let implements Operator{
 		try {
 			if (mNodeList.size() >= 2) {
 				ExpressionNode result = new ExpressionNode();
-				//Scope tempScope = mCurrentScope;
-				//mCurrentScope = new Scope("let");
-				//mCurrentScope.setParentScope(tempScope);
 				ListNode variableSpecs = (ListNode)mNodeList.get(1);
 				//sets the variables
 				letvariableInitializer(variableSpecs);
-				System.out.println("let Scope " + mCurrentScope.getVariables());
+				//System.out.println("let Scope " + mCurrentScope.getVariables());
 				if (mNodeList.size() > 2) {
 					for (int i = 2; i < mNodeList.size(); i++) {
 						result = Eval.evaluateExpr(mNodeList.get(i));
@@ -32,7 +29,6 @@ public class Let implements Operator{
 				} else {
 					return new SymbolNode("NIL", null);
 				}
-				//mCurrentScope = tempScope;
 				return result;
 			} else {
 				throw new EvalException("Too few parameters for special operator LET " + mNodeList);

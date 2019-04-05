@@ -6,12 +6,13 @@ public class FunctionStruct {
 	
 	private int mParamCount;
 	private ArrayList<SymbolNode> mParameters = new ArrayList<>();
-	private ExpressionNode mFunctionBody;
+	//private ExpressionNode mFunctionBody;
+	private ArrayList<ExpressionNode> mFunctionBodyForms;
 	private Closure mClosure;
 	
-	public FunctionStruct(int count, ExpressionNode body) {
+	public FunctionStruct(int count, ArrayList<ExpressionNode> body) {
 		mParamCount = count;
-		mFunctionBody = body;
+		mFunctionBodyForms = body;
 		mClosure = null;
 	}
 	
@@ -19,8 +20,8 @@ public class FunctionStruct {
 		return mParamCount;
 	}
 	
-	public ExpressionNode getFunctionBody() {
-		return mFunctionBody;
+	public ArrayList<ExpressionNode> getFunctionBody() {
+		return mFunctionBodyForms;
 	}
 	
 	public ArrayList<SymbolNode> getParamList() {

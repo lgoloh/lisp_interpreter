@@ -1,14 +1,16 @@
 package analysis;
 
+import java.util.ArrayList;
+
 public class ExecutionContext {
 	
 	private Scope mFunctionScope;
-	private ExpressionNode mFunctionBody;
+	private ArrayList<ExpressionNode> mFunctionBody;
 	private ExpressionNode mReturnValue;
 	
 	public ExecutionContext() {}
 	
-	public ExecutionContext(Scope scope, ExpressionNode function) {
+	public ExecutionContext(Scope scope, ArrayList<ExpressionNode> function) {
 		mFunctionScope = scope;
 		mFunctionBody = function;
 	}
@@ -17,7 +19,7 @@ public class ExecutionContext {
 		return mFunctionScope;
 	}
 	
-	public ExpressionNode getFunctionBody() {
+	public ArrayList<ExpressionNode> getFunctionBody() {
 		return mFunctionBody;
 	}
 	

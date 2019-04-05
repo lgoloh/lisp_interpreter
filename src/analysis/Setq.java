@@ -26,8 +26,6 @@ public class Setq implements Operator {
 						System.out.println("Current Scope in Setq: " + currentScope.getScope());
 						ExpressionNode value = (ExpressionNode)currentScope.lookup(variable);
 						nvalue = Eval.evaluateExpr(mNodeList.get(j));
-						//System.out.print("setq value: " + value);
-						//if the value is not found, put it in the global variable
 						if (value == null) {
 							globalScope.addVariable(varname, nvalue);
 						} else {

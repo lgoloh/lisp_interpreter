@@ -234,7 +234,7 @@ public class Evaluator {
 						argList.addAll(nodes);
 						return evaluateOr(argList);
 					}
-					
+					/**
 					else if (operation instanceof SymbolNode 
 							&& ((SymbolNode) operation).getValue().equals("DEFUN")) {
 						String funcname = (String) ((SymbolNode) nodes.get(1)).getValue();
@@ -250,6 +250,7 @@ public class Evaluator {
 						
 					}
 					//handles user defined functions
+					
 					else if (operation instanceof FunctionStruct) {
 						int paramcount = nodes.size() - 1;
 						if (paramcount == ((FunctionStruct) operation).getParamCount()) {
@@ -271,7 +272,7 @@ public class Evaluator {
 							mCurScope = mCurScope.getParentScope();
 							return result;
 						}
-					}
+					}**/
 					
 					else if (operation instanceof SymbolNode 
 							&& (((SymbolNode) operation).getValue().equals("=") 

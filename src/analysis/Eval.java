@@ -279,10 +279,8 @@ public class Eval {
 					}
 					//handles user defined functions
 					else if (operation instanceof FunctionStruct) {
-						//Scope tempScope = mCurScope;
 						int paramcount = nodes.size() - 1;
 						if (paramcount == ((FunctionStruct) operation).getParamCount()) {
-							//the tempScope;
 							Scope tempScope = mCurScope;
 							Scope functionscope = new Scope((String) head.getValue());
 							if (((FunctionStruct) operation).getClosure() != null) {
@@ -299,9 +297,9 @@ public class Eval {
 							}
 							ExecutionContext env = new ExecutionContext(functionscope, ((FunctionStruct) operation).getFunctionBody());
 							mCurScope = env.getFunctionScope();
-							//System.out.println("Closure: " + mCurScope.getParentScope().getVariables());
-							ExpressionNode functionBody = env.getFunctionBody();
-							ExpressionNode result = evaluateList(functionBody);
+							ArrayList<ExpressionNode> functionBody = env.getFunctionBody();
+							Progn implicitProgn = new Progn(functionBody);
+							ExpressionNode result = implicitProgn.evaluateExpression();
 							mCurScope = tempScope;
 							return result;
 						} else if (paramcount < ((FunctionStruct) operation).getParamCount()) {
@@ -355,6 +353,7 @@ public class Eval {
 					
 					//PROGN
 					else if (operation instanceof Progn) {
+						nodes.remove(0);
 						operation = new Progn(nodes); 
 						return ((Progn) operation).evaluateExpression();
 					}

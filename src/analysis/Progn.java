@@ -16,7 +16,7 @@ public class Progn implements Operator{
 	
 	public ExpressionNode evaluateExpression() {
 		ExpressionNode result = new SymbolNode("NIL", null);
-		for (int i = 1; i < mNodeList.size(); i++) {
+		for (int i = 0; i < mNodeList.size(); i++) {
 			result = Eval.evaluateExpr(mNodeList.get(i));
 		}
 		return result;
