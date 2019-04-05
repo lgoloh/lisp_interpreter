@@ -16,7 +16,8 @@ public class Main {
 	{	
 		Tokenizer tokenizer = new Tokenizer();
 		Parser parser = new Parser();
-		Evaluator evaluator = new Evaluator();
+		Eval evaluator = new Eval();
+		//Evaluator evaluator = new Evaluator();
 		//Scanner scanner = new Scanner(System.in);
 		while (mRunner) {
 			Scanner scanner = new Scanner(System.in);

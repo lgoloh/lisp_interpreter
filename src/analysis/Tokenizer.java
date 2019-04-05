@@ -28,11 +28,11 @@ public class Tokenizer {
 		mInputString = inputString;
 		mCurPosition = 0;
 		mCurToken = null;
-	}
+	}	
 	
 	public Token getNextToken() {
 		char character = 0;
-		if (mCurPosition == mInputString.length()) {
+		if (mCurPosition >= mInputString.length()) {
 			mCurPosition++;
 			return new Token(Type.EOF, "eof"); 
 		} else if (mCurPosition < mInputString.length()) {
@@ -50,11 +50,12 @@ public class Tokenizer {
 				
 				}
 			if (Character.isDigit(character) || character == '+' || character == '-') {
+				int tempPosition = mCurPosition;
 				mCurToken =  recognizeNumberToken(mInputString.substring(mCurPosition));
 				if (mCurToken != null) {
 					return mCurToken;
 				} else {
-					mCurToken = recognizeSymbolToken(mInputString.substring(mCurPosition));
+					mCurToken = recognizeSymbolToken(mInputString.substring(tempPosition));
 					return mCurToken;
 				}	
 			}
@@ -133,7 +134,7 @@ public class Tokenizer {
 						|| (character == '(' || character == ')')){
 					return new Token(Type.SYMBOL, value);
 				} 
-			} 
+			}
 			return new Token(Type.SYMBOL, value);
 		}
 	}
@@ -160,11 +161,20 @@ public class Tokenizer {
 	 * @return
 	 */
 	private boolean isSpecialOperator(char c) {
-		if (Character.toString(c).equals("'") || c == '#') {
+		if (Character.toString(c).equals("'")) {
 			return true;
 		}
 		return false;
 	}
+	
+	/**
+	private String recognizeSharpQuote(String inputString) {
+		String value = 
+		mCurPosition++;
+		if (Character.toString(inputString.charAt(mCurPosition)).equals("'")) {
+			
+		}
+	} **/
 	
 	/**
 	 * Moves the index to the next position 
@@ -192,7 +202,7 @@ public class Tokenizer {
 		allTokens.add(token);
 		/**for (Token t : allTokens) {
 			System.out.println(t.toString());
-		}**/
+		} **/
 		return allTokens;
 	}
  

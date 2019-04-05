@@ -16,6 +16,9 @@ public class Evaluator {
 			"LIST", "CONS", "CAR", "CDR", "LISTP", "NIL", "T", "NULL", "IF", 
 			"AND", "OR", "<", ">", "<=", ">=", "=", "/=", "DEFUN", "LET", "SETQ", 
 			"EQUAL", "DO", "PROGN", "TERPRI", "PRINC", "QUIT", "NOT", "APPLY", "FUNCTION"};
+	
+	private static String[] mSpecialOperators = {"NIL", "T", "IF", "QUOTE" };
+	
 	//The Global Scope 
 	private Scope mGlobalScope = new Scope("Global");
 	
@@ -83,6 +86,7 @@ public class Evaluator {
 					case "CDR":
 						return new Cdr();
 					case "T":
+						System.out.println(head);
 						return head;
 					case "LISTP":
 						return new ListP();
@@ -92,6 +96,7 @@ public class Evaluator {
 						return head;
 					case "AND":
 						return head;
+						//return new And();
 					case "OR":
 						return head;
 					case "DEFUN":
@@ -129,6 +134,7 @@ public class Evaluator {
 		} catch(EvalException e) {
 			System.out.println(e);
 		}
+		System.out.println(head);
 		//System.out.println(mGlobalScope.getVariables());
 		return null;
 	}
@@ -211,6 +217,7 @@ public class Evaluator {
 							throw new EvalException("too many arguments for special operator IF " + listnode);
 						}
 					}
+					
 					
 					else if (operation instanceof SymbolNode
 							&& ((SymbolNode) operation).getValue().equals("AND")) {
@@ -708,7 +715,7 @@ public class Evaluator {
 	 * @param node
 	 * @return
 	 */
-	private ExpressionNode evaluateExpr(ExpressionNode node) {
+	public ExpressionNode evaluateExpr(ExpressionNode node) {
 		//System.out.println("Scope here: " + mCurScope.getScope());
 		//System.out.println("Scope variables here: " + mCurScope.getVariables());
 		ExpressionNode result = new ExpressionNode();

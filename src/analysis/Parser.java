@@ -57,7 +57,6 @@ public class Parser {
 			} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
 			}
-		//System.out.println(mSyntaxTree2.toString());
 		return mSyntaxTree2;
 	}
 	
@@ -101,6 +100,8 @@ public class Parser {
 				ExpressionNode expr = new ExpressionNode();
 				if (symbol.equals("'")) {
 					expr = expandQuote();
+				} else if (symbol.equals("#")) {
+					expr = expandSharpQuote();
 				} else {
 					expr = new SymbolNode(symbol.toUpperCase(), new ArrayList<>());
 				}
@@ -134,6 +135,17 @@ public class Parser {
 			argList.add(1, getcurExpression(mTokens.get(mCurPosition))); 
 		}
 		//System.out.println(new ListNode(listtkn, argList));
+		return new ListNode(listtkn, argList);
+	}
+	
+	
+	public ExpressionNode expandSharpQuote() {
+		mCurPosition++;
+		Token listtkn = new Token(Type.SOE, "(");
+		SymbolNode functionSymbol = new SymbolNode("FUNCTION", null);
+		ArrayList<ExpressionNode> argList = new ArrayList<>();
+		argList.add(0, functionSymbol);
+		argList.add(1, getcurExpression(mTokens.get(mCurPosition)));
 		return new ListNode(listtkn, argList);
 	}
 	

@@ -1,13 +1,18 @@
 package analysis;
 
-public class Cons {
+import java.util.ArrayList;
+
+import util.Token;
+import util.Type;
+
+public class Cons implements Operator {
 	
 	ExpressionNode mInput;
-	ListNode mList;
+	ExpressionNode mList;
 
 	public Cons() {}
 	
-	public Cons (ExpressionNode node, ListNode list) {
+	public Cons (ExpressionNode node, ExpressionNode list) {
 		mInput = node;
 		mList = list;
 	}
@@ -21,7 +26,19 @@ public class Cons {
 		mInput = node;
 	}
 	
-	public void setList(ListNode list) {
+	public void setList(ExpressionNode list) {
 		mList = list;
 	}
+	
+	@Override
+	public ExpressionNode evaluateExpression() {
+		if (mList instanceof SymbolNode && mList.getValue().equals("NIL")) {
+			Token token = new Token(Type.SOE, "(");
+			ListNode emptyList = new ListNode(token, new ArrayList<>());
+			mList = emptyList;
+		}
+		mList.getnodeList().add(0, mInput);
+		return mList;
+	}
+	
 }
