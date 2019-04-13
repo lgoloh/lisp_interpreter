@@ -2,5 +2,5 @@ package analysis;
 
 public interface Operator {
 
-	ExpressionNode evaluateExpression();
+	ExpressionNode evaluateExpression() throws EvalException;
 }

@@ -20,14 +20,19 @@ public class Do implements Operator {
 		try {
 			ArrayList<ExpressionNode> variableSpecs = mDoExpression.get(1).getnodeList();
 			ArrayList<ExpressionNode> secondArgList = mDoExpression.get(2).getnodeList();
+			ArrayList<ExpressionNode> afterIterExpressions = new ArrayList<ExpressionNode>();
 			ExpressionNode endtest = secondArgList.get(0);
-			secondArgList.remove(0);
-			ArrayList<ExpressionNode> afterIterExpressions = secondArgList;
+			//secondArgList.remove(0);
+			for (int i = 1; i < secondArgList.size(); i++) {
+				afterIterExpressions.add(secondArgList.get(i));
+			}
+			//ArrayList<ExpressionNode> afterIterExpressions = secondArgList;
 			HashMap<String, Object> stepforms = new HashMap<String, Object>();
-			ExpressionNode bodyexpressions = null;
+			ArrayList<ExpressionNode> bodyexpressions = new ArrayList<ExpressionNode>();
 			ExpressionNode result = null;
 			if (mDoExpression.size() > 3) {
-				bodyexpressions = mDoExpression.get(3);
+				for (int i = 3; i < mDoExpression.size(); i++)
+				bodyexpressions.add(mDoExpression.get(i));
 			}
 			for (ExpressionNode node : variableSpecs) {
 				if (node instanceof ListNode) {
@@ -37,8 +42,11 @@ public class Do implements Operator {
 				}
 			}
 			while (!(isEndIteration(endtest))) {
-				if (bodyexpressions != null) {
-					Eval.evaluateExpr(bodyexpressions);
+				//if the list of body expressions is not empty
+				if (!(bodyexpressions.isEmpty())) {
+					for (ExpressionNode expr : bodyexpressions) {
+						Eval.evaluateExpr(expr);
+					}
 					stepforms = incrementVar(variableSpecs);
 					mCurScope.setVariableHash(stepforms);
 				} else {
@@ -83,8 +91,9 @@ public class Do implements Operator {
 	 * Evaluates the step-form of a variable
 	 * @param varname
 	 * @param updateexpr
+	 * @throws EvalException 
 	 */
-	private HashMap<String, Object> incrementVar(ArrayList<ExpressionNode> varspecs) {
+	private HashMap<String, Object> incrementVar(ArrayList<ExpressionNode> varspecs) throws EvalException {
 		HashMap<String, Object> stepforms = new HashMap<String, Object>();
 		for (int i = 0; i < varspecs.size(); i++) {
 			ExpressionNode node = varspecs.get(i);
@@ -100,8 +109,9 @@ public class Do implements Operator {
 	 * Tests the end iteration expression
 	 * @param endtest
 	 * @return
+	 * @throws EvalException 
 	 */
-	private boolean isEndIteration(ExpressionNode endtest) {
+	private boolean isEndIteration(ExpressionNode endtest) throws EvalException {
 		ExpressionNode result = Eval.evaluateExpr(endtest);
 		if (result.isEqual(new SymbolNode("T", null))) {
 			return true;

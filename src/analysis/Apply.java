@@ -39,6 +39,7 @@ public class Apply implements Operator {
 				argList.add(node);
 			}
 			ListNode resultExpr = new ListNode(listtkn, argList);
+			//System.out.println(resultExpr + " in apply function");
 			return Eval.evaluateExpr(resultExpr);
 		}catch(EvalException e) {
 			System.out.print(e);

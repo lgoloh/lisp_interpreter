@@ -14,7 +14,9 @@ public class Progn implements Operator{
 		mNodeList = nodes;
 	}
 	
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
+		//System.out.println("Progn nodes: " + mNodeList);
+		//System.out.println(mNodeList.size());
 		ExpressionNode result = new SymbolNode("NIL", null);
 		for (int i = 0; i < mNodeList.size(); i++) {
 			result = Eval.evaluateExpr(mNodeList.get(i));

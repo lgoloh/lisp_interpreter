@@ -13,7 +13,7 @@ public class FunctionOperator implements Operator {
 	}
 	
 	@Override
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
 		String functionsymbol = (String) mFunctionSymbol.getValue();
 		Object mFunctionObject = Eval.evaluateSymbol(mFunctionSymbol);
 		ExpressionNode function = new FunctionExpression(functionsymbol, mFunctionObject, mFunctionType);

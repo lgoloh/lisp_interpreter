@@ -12,7 +12,7 @@ private ExpressionNode mOrExpression;
 	
 	public Or() {}
 	
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
 		ArrayList<ExpressionNode> nodeList = mOrExpression.getnodeList();
 		nodeList.remove(0);
 		if (nodeList.size() > 0) {

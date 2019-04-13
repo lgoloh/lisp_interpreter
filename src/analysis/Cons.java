@@ -32,6 +32,7 @@ public class Cons implements Operator {
 	
 	@Override
 	public ExpressionNode evaluateExpression() {
+		//System.out.println("List inside cons: " + mList);
 		if (mList instanceof SymbolNode && mList.getValue().equals("NIL")) {
 			Token token = new Token(Type.SOE, "(");
 			ListNode emptyList = new ListNode(token, new ArrayList<>());

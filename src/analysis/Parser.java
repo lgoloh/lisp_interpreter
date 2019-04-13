@@ -43,8 +43,11 @@ public class Parser {
 				}
 				if (thistoken.getValue().equals("'")) {
 					expr = expandQuote();
-					} else {
-						expr = getcurExpression(thistoken);
+					
+				} else if (thistoken.getValue().equals("#'")) {
+					expr = expandSharpQuote();
+				}else {
+					expr = getcurExpression(thistoken);
 					}
 				if (mSyntaxTree2 != null) {
 					mSyntaxTree2.getnodeList().add(expr);
@@ -57,6 +60,7 @@ public class Parser {
 			} else {
 			throw new InvalidInputError("Non Matching Parenthesis");
 			}
+		//System.out.println(mSyntaxTree2);
 		return mSyntaxTree2;
 	}
 	
@@ -100,7 +104,7 @@ public class Parser {
 				ExpressionNode expr = new ExpressionNode();
 				if (symbol.equals("'")) {
 					expr = expandQuote();
-				} else if (symbol.equals("#")) {
+				} else if (symbol.equals("#'")) {
 					expr = expandSharpQuote();
 				} else {
 					expr = new SymbolNode(symbol.toUpperCase(), new ArrayList<>());

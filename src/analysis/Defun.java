@@ -26,7 +26,7 @@ public class Defun implements Operator {
 			bodyForms.add(mFunctionDetails.get(i));
 		}
 		ExpressionNode body = mFunctionDetails.get(3);
-		System.out.println("Function body: " + body);
+		//System.out.println("Function body: " + body);
 		FunctionStruct function = new FunctionStruct(paramcount, bodyForms);
 		for (ExpressionNode variable : paramlist) {
 			function.addParam((SymbolNode) variable);

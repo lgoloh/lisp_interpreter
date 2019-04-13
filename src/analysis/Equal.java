@@ -12,7 +12,7 @@ public class Equal implements Operator {
 		mParam2 = node2;
 	}
 	
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
 		ExpressionNode result1 = Eval.evaluateExpr(mParam1);
 		ExpressionNode result2 = Eval.evaluateExpr(mParam2);
 		boolean result = result1.isEqual(result2);

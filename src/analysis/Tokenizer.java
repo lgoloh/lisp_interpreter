@@ -117,9 +117,24 @@ public class Tokenizer {
 	 */
 	private Token recognizeSymbolToken(String mInputString) {
 		char character = mInputString.charAt(0);
+		//System.out.println(character);
 		mCurPosition++;
+		//int tempPosition = mCurPosition;
 		String value = Character.toString(character);
 		if (mInputString.length() == 1 || isSpecialOperator(character)) {
+			if (isSpecialOperator(character)) {
+				switch(value) {
+				  case "'":
+					  return new Token(Type.SYMBOL, value);
+				  case "#":
+					 String res = recognizeSharpQuote(mInputString.charAt(1));
+					 if (res != null) {
+						 value+=res;
+						 mCurPosition++;
+						 return new Token(Type.SYMBOL, value);
+					 }
+				}
+			}
 			return new Token(Type.SYMBOL, value);
 		} else {
 			for (int i = 1; i < mInputString.length();) {
@@ -161,20 +176,20 @@ public class Tokenizer {
 	 * @return
 	 */
 	private boolean isSpecialOperator(char c) {
-		if (Character.toString(c).equals("'")) {
+		if (Character.toString(c).equals("'") || Character.toString(c).equals("#")) {
 			return true;
 		}
 		return false;
 	}
 	
-	/**
-	private String recognizeSharpQuote(String inputString) {
-		String value = 
-		mCurPosition++;
-		if (Character.toString(inputString.charAt(mCurPosition)).equals("'")) {
-			
+	
+	private String recognizeSharpQuote(Character nxtChar) {
+		String value = Character.toString(nxtChar);
+		if (value.equals("'")) {
+			return value;
 		}
-	} **/
+		return null;
+	} 
 	
 	/**
 	 * Moves the index to the next position 
@@ -202,7 +217,7 @@ public class Tokenizer {
 		allTokens.add(token);
 		/**for (Token t : allTokens) {
 			System.out.println(t.toString());
-		} **/
+		}**/
 		return allTokens;
 	}
  

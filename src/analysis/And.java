@@ -12,7 +12,7 @@ public class And implements Operator {
 	
 	public And () {}
 	
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
 		ArrayList<ExpressionNode> nodeList = mAndExpression.getnodeList();
 		nodeList.remove(0);
 		if (nodeList.size() > 0) {

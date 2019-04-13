@@ -2,17 +2,18 @@ package analysis;
 
 public class ListP implements Operator {
 
-	private ListNode mList;
+	private ExpressionNode mList;
 	
 	public ListP() {}
 	
-	public ListP(ListNode node) {
+	public ListP(ExpressionNode node) {
 		mList = node;
 	}
 	
 	@Override
-	public ExpressionNode evaluateExpression() {
-		if (mList != null) {
+	public ExpressionNode evaluateExpression() throws EvalException {
+		ExpressionNode result = Eval.evaluateExpr(mList);
+		if (result instanceof ListNode) {
 			return new SymbolNode("T", null);
 		}
 		return new SymbolNode("NIL", null);

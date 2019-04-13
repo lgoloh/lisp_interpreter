@@ -12,7 +12,7 @@ public class Main {
 	private static String mInput;
 	private static boolean mRunner = true;
 	
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, EvalException
 	{	
 		Tokenizer tokenizer = new Tokenizer();
 		Parser parser = new Parser();
@@ -29,13 +29,12 @@ public class Main {
 				parser.setTokenList(tokenizedInput);
 				ExpressionNode syntaxTree = parser.generateSyntaxTree();
 				evaluator.setTree(syntaxTree);
-				/**
 				try {
-					
-				} catch(EvalException e) {
+					System.out.println(evaluator.evaluateTree());
+				}catch(EvalException e) {
 					System.out.println(e);
-				} **/
-				System.out.println(evaluator.evaluateTree());
+				}
+				
 				mInput = null;
 				continue;
 				}	

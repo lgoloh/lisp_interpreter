@@ -16,7 +16,7 @@ public class ListOperator implements Operator {
 	}
 	
 	@Override
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
 			Token token = new Token(Type.SOE, "(");
 			ListNode resultList = new ListNode(token, new ArrayList<ExpressionNode>());
 				if (mNodeList.size() == 1) {
