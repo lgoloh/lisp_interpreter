@@ -440,7 +440,7 @@ public class Evaluator {
 	
 	
 	
-	private ExpressionNode evalStack(BinOperator operation, Stack<ExpressionNode> arguments) {
+	private ExpressionNode evalStack(BinOperator operation, Stack<ExpressionNode> arguments) throws EvalException {
 		while (arguments.size() != 1) {
 			operation.setFirstParameter(arguments.pop());
 			operation.setSecondParameter(arguments.pop());

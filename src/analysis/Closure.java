@@ -1,8 +1,11 @@
 package analysis;
 
+
+
 public class Closure {
 
-	public Scope mEnvScope;
+	private Scope mEnvScope;
+	private ExpressionNode mFunctionBody;
 	
 	public Closure(Scope scope) {
 		mEnvScope = scope;
@@ -10,5 +13,18 @@ public class Closure {
 	
 	public Scope getClosureScope() {
 		return mEnvScope;
+	}
+	
+	public void setFunctionBody(ExpressionNode body) {
+		mFunctionBody = body;
+	}
+	
+	public ExpressionNode getFunctionBody() {
+		return mFunctionBody;
+	}
+	
+	@Override
+	public String toString() {
+		return mFunctionBody.toString();
 	}
 }

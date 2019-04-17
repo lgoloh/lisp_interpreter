@@ -87,6 +87,8 @@ public class Eval {
 						return new Equal();
 					case "EQUAL"	:
 						return new Equal();
+					case "/=":
+						return new NotEqual();
 					case "SETQ":
 						return new Setq();
 					case "LET":
@@ -144,7 +146,6 @@ public class Eval {
 		try {
 			if (nodes.size() >= 1 && nodes.get(0) instanceof SymbolNode) {
 				ExpressionNode head = nodes.get(0);
-				
 				if (isValidOperator((String) head.getValue(), mValidOperators) || mUserDefined.contains((String) head.getValue()))
 				{
 					Object operation = evaluateSymbol((SymbolNode) head);
@@ -172,8 +173,6 @@ public class Eval {
 					else if (operation instanceof Cons) {
 						if (nodes.size() == 3) {
 							try {
-								//Checks to make sure list is a ListNode Object
-								//ExpressionNode data = getDataList(nodes.get(2));
 								ExpressionNode data = evaluateExpr(nodes.get(2));
 								ExpressionNode newValue = new ExpressionNode();
 								if (data instanceof ListNode
@@ -204,7 +203,6 @@ public class Eval {
 					
 					else if (operation instanceof Car) {
 						try {
-							//ExpressionNode data = getDataList(nodes.get(1));
 							ExpressionNode data = evaluateExpr(nodes.get(1));
 							if (data instanceof ListNode
 									|| (data instanceof SymbolNode && data.getValue().equals("NIL"))) {
@@ -220,7 +218,6 @@ public class Eval {
 					
 					else if (operation instanceof Cdr) {
 						try {
-							//ExpressionNode data = getDataList(nodes.get(1));
 							ExpressionNode data = evaluateExpr(nodes.get(1));
 							if (data instanceof ListNode
 									|| (data instanceof SymbolNode && data.getValue().equals("NIL"))) {
@@ -236,7 +233,6 @@ public class Eval {
 					//LISTP
 					else if (operation instanceof ListP) {
 						if (nodes.size() == 2) {
-							//ListNode data = (ListNode) getDataList(nodes.get(1));
 							operation = new ListP(nodes.get(1));
 							return ((ListP) operation).evaluateExpression();
 						} else if (nodes.size() > 2) {
@@ -249,11 +245,9 @@ public class Eval {
 					//NULL
 					else if (operation instanceof SymbolNode 
 							&& ((SymbolNode) operation).getValue().equals("NULL")) {
-						//System.out.println("Eval null");
 						if (nodes.size() > 2) {
 							throw new EvalException("too many arguments given to NULL " + listnode);
 						} else {
-							//System.out.println("Eval null 2");
 							return evaluateNull(nodes.get(1));
 						}
 					}
@@ -311,15 +305,11 @@ public class Eval {
 								functionscope.addVariable((String) variable.getValue(), evaluateExpr(nodes.get(i)));
 								i++;
 							}
-							//System.out.println("Functions vars: " + functionscope.getVariables());
 							ExecutionContext env = new ExecutionContext(functionscope, ((FunctionStruct) operation).getFunctionBody());
 							mCurScope = env.getFunctionScope();
 							ArrayList<ExpressionNode> functionBody = env.getFunctionBody();
-							//System.out.println("inside function call, function body: " +functionBody);
-							//System.out.println("Current scope vars: "+ mCurScope.getVariables());
 							Progn implicitProgn = new Progn(functionBody);
 							ExpressionNode result = implicitProgn.evaluateExpression();
-							//System.out.println(result + " is result of implicit progn in defun");
 							mCurScope = tempScope;
 							return result;
 						} else if (paramcount < ((FunctionStruct) operation).getParamCount()) {
@@ -329,7 +319,7 @@ public class Eval {
 						} 
 					}
 					
-					//EQUAL/=
+					//EQUAL & =
 					else if (operation instanceof Equal) {
 						if (nodes.size() == 3) {
 							operation = new Equal(nodes.get(1), nodes.get(2));
@@ -340,6 +330,18 @@ public class Eval {
 							throw new EvalException("too many arguments given to " + nodes.get(0));
 						}
 						
+					}
+					
+					// /=
+					else if (operation instanceof NotEqual) {
+						if (nodes.size() == 3) {
+							operation = new NotEqual(nodes.get(1), nodes.get(2));
+							return ((NotEqual) operation).evaluateExpression();
+						} else if (nodes.size() < 3){
+							throw new EvalException("too few arguments given to " + nodes.get(0));
+						} else if (nodes.size() > 3) {
+							throw new EvalException("too many arguments given to " + nodes.get(0));
+						}
 					}
 					
 					//SETQ
@@ -413,16 +415,30 @@ public class Eval {
 					
 					//FUNCTION
 					else if (operation instanceof FunctionOperator) {
-						String functionName = (String) ((SymbolNode) nodes.get(1)).getValue();
-						String functionType = null;
-						if (isValidOperator(functionName, mBuiltinOperators)) {
-							functionType = "Builtin";
-						} else if (mUserDefined.contains(functionName)) {
-							functionType = "UserDefined";
-						} else {
-							throw new EvalException("Undefined function " + nodes.get(1));
+						String functionName = "";
+						String functionType = "";
+						Object functionObject = null;
+						if (nodes.get(1) instanceof SymbolNode) {
+							functionName = (String) ((SymbolNode) nodes.get(1)).getValue();
+							if (isValidOperator(functionName, mBuiltinOperators)) {
+								functionType = "Builtin";
+								functionObject = evaluateSymbol(nodes.get(1));
+							} else if (mUserDefined.contains(functionName)) {
+								functionType = "UserDefined";
+								functionObject = isDefined((SymbolNode) nodes.get(1));
+							} else {
+								throw new EvalException("Undefined function " + nodes.get(1));
+							}
+						} else if (nodes.get(1) instanceof ListNode) {
+							String lambdahead = (String) nodes.get(1).getnodeList().get(0).getValue();
+							if (lambdahead.equals("LAMBDA")) {
+								functionType = "Anonymous";
+								Closure closure = new Closure(mCurScope);
+								closure.setFunctionBody(nodes.get(1));
+								functionObject = closure;
+							}
 						}
-						operation = new FunctionOperator((SymbolNode) nodes.get(1), functionType);
+						operation = new FunctionOperator(functionName, functionObject, functionType);
 						return ((FunctionOperator) operation).evaluateExpression();
 					}
 					
@@ -435,7 +451,7 @@ public class Eval {
 					
 					//EVAL
 					else if (operation instanceof EvalOperator) {
-						System.out.println("Eval input: " + nodes);
+						//System.out.println("Eval input: " + nodes);
 						if (nodes.size() == 2) {
 							if (nodes.get(1) instanceof ListNode) {
 								ExpressionNode arg = evaluateExpr(nodes.get(1));
@@ -457,7 +473,29 @@ public class Eval {
 				
 			} else if (nodes.size() < 1){
 				return new SymbolNode("NIL", null);
-			} else if (!(nodes.get(0) instanceof SymbolNode)) {
+			} 
+			
+			//LAMBDA
+			else if (nodes.get(0) instanceof ListNode) {
+				ArrayList<ExpressionNode> op = nodes.get(0).getnodeList();
+				ArrayList<ExpressionNode> args = new ArrayList<ExpressionNode>();
+				if (op.get(0) instanceof SymbolNode && op.get(0).getValue().equals("LAMBDA")) {
+					Scope tempScope = mCurScope;
+					mCurScope = new Scope("lambda");
+					mCurScope.setParentScope(tempScope);
+					for (int i = 1; i < nodes.size(); i++) {
+						args.add(nodes.get(i));
+					}
+					Lambda lambda = new Lambda(nodes.get(0), args);
+					ExpressionNode result = lambda.evaluateExpression();
+					mCurScope = tempScope;
+					return result;
+				} else {
+					throw new EvalException(nodes.get(0) + " is not a function name. Try a symbol instead");
+				}
+			} 
+	
+			else if (!(nodes.get(0) instanceof SymbolNode)) {
 				throw new EvalException(nodes.get(0) + " is not a function name. Try a symbol instead");
 			} 
 		}catch(EvalException e) {
@@ -477,6 +515,9 @@ public class Eval {
 		return mGlobalScope;
 	}
 	
+	public static void setCurrentScope(Scope scope) {
+		mCurScope = scope;
+	}
 	
 	public static ExpressionNode evaluateExpr(ExpressionNode node) throws EvalException {
 		ExpressionNode result = new ExpressionNode();
@@ -559,7 +600,7 @@ public class Eval {
 	}
 	
 	
-	private static ExpressionNode evalStack(BinOperator operation, Stack<ExpressionNode> arguments) {
+	private static ExpressionNode evalStack(BinOperator operation, Stack<ExpressionNode> arguments) throws EvalException {
 		if (arguments.size() == 1) {
 			if (operation instanceof Sum || operation instanceof Subtract) {
 				operation.setFirstParameter(new NumberNode(0, null));
@@ -609,22 +650,15 @@ public class Eval {
 	 * @param arg
 	 * @return
 	 * @throws EvalException 
-	 */
+	 */	
 	private static ExpressionNode evaluateNull(ExpressionNode arg) throws EvalException {
-		if (arg instanceof SymbolNode) {
-			ExpressionNode res = (ExpressionNode) evaluateSymbol(arg);
-			if (res.getValue().equals("NIL") || res.getnodeList().isEmpty())
-				return new SymbolNode("T", null);
-			else
-				return new SymbolNode("NIL", null); 
-		}if (arg instanceof ListNode && ((ListNode) arg).isEmpty()) {
+		ExpressionNode result = evaluateExpr(arg);
+		if (result instanceof SymbolNode && result.getValue().equals("NIL")) {
 			return new SymbolNode("T", null);
-		} else if (arg instanceof ListNode) {
-			ExpressionNode data = evaluateList(arg);
-			if (data instanceof ListNode && ((ListNode) data).isEmpty()) {
-				return new SymbolNode("T", null);
-			}
+		} else if (result instanceof ListNode && ((ListNode) result).isEmpty()) {
+			return new SymbolNode("T", null);
 		}
+		
 		return new SymbolNode("NIL", null);
 	}
 	

@@ -9,7 +9,7 @@ public class Divide extends BinOperator {
 	}
 	
 	@Override
-	public ExpressionNode evaluateOperation() {
+	public ExpressionNode evaluateOperation() throws EvalException {
 		try {
 			if ((int)mParam2.getValue() != 0 && mParam2 != null) {
 				return new NumberNode(((int)mParam1.getValue() / (int) mParam2.getValue()), null);
@@ -17,8 +17,9 @@ public class Divide extends BinOperator {
 				throw new EvalException("Argument 'divisor' is 0");
 			}
 		}catch(EvalException e) {
-			System.out.println(e);
+			throw e;
+			//System.out.println(e);
 		}
-		return new NumberNode(0, null);
+		//return new NumberNode(0, null);
 	}
 }

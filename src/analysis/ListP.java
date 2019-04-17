@@ -15,6 +15,8 @@ public class ListP implements Operator {
 		ExpressionNode result = Eval.evaluateExpr(mList);
 		if (result instanceof ListNode) {
 			return new SymbolNode("T", null);
+		} else if (result instanceof SymbolNode && result.getValue().equals("NIL")) {
+			return new SymbolNode("T", null);
 		}
 		return new SymbolNode("NIL", null);
 	}

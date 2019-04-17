@@ -23,7 +23,7 @@ public class Setq implements Operator {
 					if (mNodeList.get(i) instanceof SymbolNode) {
 						String varname = (String) ((SymbolNode) mNodeList.get(i)).getValue();
 						SymbolNode variable = (SymbolNode) mNodeList.get(i);
-						System.out.println("Current Scope in Setq: " + currentScope.getScope());
+						///System.out.println("Current Scope in Setq: " + currentScope.getScope());
 						ExpressionNode value = (ExpressionNode)currentScope.lookup(variable);
 						nvalue = Eval.evaluateExpr(mNodeList.get(j));
 						if (value == null) {

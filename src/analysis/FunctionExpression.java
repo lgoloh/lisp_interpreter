@@ -27,6 +27,8 @@ public class FunctionExpression extends ExpressionNode {
 			return ("<" + "Built-In Function " +  mSymbol + ">");
 		case "UserDefined":
 			return ("<" + "User-Defined Function " +  mSymbol + ">");
+		case "Anonymous":
+			return ("<"+ "Anonymous Function " + mFunction + ">");
 		}
 		return null;
 	}

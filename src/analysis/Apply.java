@@ -22,11 +22,16 @@ public class Apply implements Operator {
 	public ExpressionNode evaluateExpression() {
 		Token listtkn = new Token(Type.SOE, "(");
 		ArrayList<ExpressionNode> argList = new ArrayList<>();
-		SymbolNode functionSymbol = null;
+		ExpressionNode functionSymbol = null;
 		try {
 			ExpressionNode funct = Eval.evaluateExpr(mFunctionOperation);
 			if (funct instanceof FunctionExpression) {
-				functionSymbol = new SymbolNode(((FunctionExpression) funct).getFunctionName(), null);
+				if (((FunctionExpression) funct).getFunctionName().equals("")) {
+					Closure closure = (Closure) ((FunctionExpression) funct).getFunction();
+					functionSymbol = closure.getFunctionBody();
+				} else {
+					functionSymbol = new SymbolNode(((FunctionExpression) funct).getFunctionName(), null);
+				}
 			} else if (funct instanceof SymbolNode) {
 				functionSymbol = (SymbolNode) funct;
 			} else {
@@ -39,7 +44,6 @@ public class Apply implements Operator {
 				argList.add(node);
 			}
 			ListNode resultExpr = new ListNode(listtkn, argList);
-			//System.out.println(resultExpr + " in apply function");
 			return Eval.evaluateExpr(resultExpr);
 		}catch(EvalException e) {
 			System.out.print(e);

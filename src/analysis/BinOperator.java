@@ -13,7 +13,7 @@ public class BinOperator {
 		mParam2 = b;
 	}
 	
-    public ExpressionNode evaluateOperation() {
+    public ExpressionNode evaluateOperation() throws EvalException {
 		return new ExpressionNode();
 	}
 	

@@ -14,7 +14,7 @@ public class Let implements Operator{
 		mNodeList = nodes;
 	}
 	
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException {
 		try {
 			if (mNodeList.size() >= 2) {
 				ExpressionNode result = new ExpressionNode();
@@ -34,13 +34,13 @@ public class Let implements Operator{
 				throw new EvalException("Too few parameters for special operator LET " + mNodeList);
 			}
 		}catch(EvalException e) {
-			System.out.println(e);
+			throw e;
+			//System.out.println(e);
 		}
-		return null;
 		
 	}
 	
-	private void letvariableInitializer(ListNode varlist) {
+	private void letvariableInitializer(ListNode varlist) throws EvalException {
 		try {
 			HashMap<String, Object> variables = new HashMap<String, Object>();
 			ArrayList<ExpressionNode> variableSpecs = varlist.getnodeList();
@@ -68,9 +68,10 @@ public class Let implements Operator{
 				}
 			}
 			mCurrentScope.setVariableHash(variables);
-			System.out.println("variables inside variable init " + mCurrentScope.getVariables());
+			//System.out.println("variables inside variable init " + mCurrentScope.getVariables());
 		} catch(EvalException e) {
-			System.out.println(e);
+			throw e;
+			//System.out.println(e);
 		}
 	}
 }
