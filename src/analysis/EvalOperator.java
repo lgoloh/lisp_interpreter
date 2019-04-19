@@ -15,7 +15,7 @@ public class EvalOperator implements Operator{
 	
 	@Override
 	public ExpressionNode evaluateExpression() throws EvalException {
-		System.out.println("EvalOperator arg: " + mExpression);
+		//System.out.println("EvalOperator arg: " + mExpression);
 		return Eval.evaluateExpr(mExpression);
 	}
 }

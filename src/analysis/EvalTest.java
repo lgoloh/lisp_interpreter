@@ -240,7 +240,7 @@ public class EvalTest {
 	}
 	
 	@Test
-	void textEval() throws IOException, EvalException {
+	void testEval() throws IOException, EvalException {
 		
 	}
 }

@@ -14,9 +14,7 @@ public class Defun implements Operator {
 	
 	@Override
 	public ExpressionNode evaluateExpression() {
-		//System.out.println("Function details: " + mFunctionDetails);
 		Scope currentScope = Eval.getCurrentScope();
-		//System.out.println("Current Scope of defun: " + currentScope.getScope());
 		Scope globalScope = Eval.getGlobalScope();
 		String funcname = (String) ((SymbolNode) mFunctionDetails.get(1)).getValue();
 		ArrayList<ExpressionNode> paramlist = mFunctionDetails.get(2).getnodeList();
@@ -26,12 +24,10 @@ public class Defun implements Operator {
 			bodyForms.add(mFunctionDetails.get(i));
 		}
 		ExpressionNode body = mFunctionDetails.get(3);
-		//System.out.println("Function body: " + body);
 		FunctionStruct function = new FunctionStruct(paramcount, bodyForms);
 		for (ExpressionNode variable : paramlist) {
 			function.addParam((SymbolNode) variable);
 		}
-		//Adds the closure to the function
 		Closure closure = setClosure(currentScope, globalScope);
 		if (closure != null) {
 			function.addClosure(closure);

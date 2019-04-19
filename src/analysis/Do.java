@@ -16,17 +16,15 @@ public class Do implements Operator {
 	}
 	
 	@Override
-	public ExpressionNode evaluateExpression() {
+	public ExpressionNode evaluateExpression() throws EvalException{
 		try {
 			ArrayList<ExpressionNode> variableSpecs = mDoExpression.get(1).getnodeList();
 			ArrayList<ExpressionNode> secondArgList = mDoExpression.get(2).getnodeList();
 			ArrayList<ExpressionNode> afterIterExpressions = new ArrayList<ExpressionNode>();
 			ExpressionNode endtest = secondArgList.get(0);
-			//secondArgList.remove(0);
 			for (int i = 1; i < secondArgList.size(); i++) {
 				afterIterExpressions.add(secondArgList.get(i));
 			}
-			//ArrayList<ExpressionNode> afterIterExpressions = secondArgList;
 			HashMap<String, Object> stepforms = new HashMap<String, Object>();
 			ArrayList<ExpressionNode> bodyexpressions = new ArrayList<ExpressionNode>();
 			ExpressionNode result = null;
@@ -42,7 +40,6 @@ public class Do implements Operator {
 				}
 			}
 			while (!(isEndIteration(endtest))) {
-				//if the list of body expressions is not empty
 				if (!(bodyexpressions.isEmpty())) {
 					for (ExpressionNode expr : bodyexpressions) {
 						Eval.evaluateExpr(expr);
@@ -63,9 +60,10 @@ public class Do implements Operator {
 			}
 			return result;
 		} catch(EvalException e) {
-			System.out.print(e);
+			throw e;
+			//System.out.print(e);
 		}
-		return null;
+		//return null;
 	}
 	
 	/**

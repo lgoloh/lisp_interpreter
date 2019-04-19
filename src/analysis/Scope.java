@@ -17,7 +17,7 @@ public class Scope {
 	
 	public void addVariable(String var, Object value) {
 		mScopeVariables.put(var, value);
-		//System.out.println("Scope variables: " + mScopeVariables);
+		//System.out.println( mScopeName + " Scope variables: " + mScopeVariables);
 	}
 	
 	public Object lookup(SymbolNode variable) {

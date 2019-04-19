@@ -18,8 +18,6 @@ public class Divide extends BinOperator {
 			}
 		}catch(EvalException e) {
 			throw e;
-			//System.out.println(e);
 		}
-		//return new NumberNode(0, null);
 	}
 }
